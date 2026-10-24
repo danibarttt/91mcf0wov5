@@ -98,7 +98,13 @@ function codiceDa(c) {
 function abbina(testo) {
   const c = decodificaCodice(testo);
   localStorage.setItem(ARCHIVIO, JSON.stringify(c));
+  chiediPersistenza();
   return c;
+}
+
+// chiede al browser di non cancellare mai i dati del sito (abbinamento compreso)
+function chiediPersistenza() {
+  navigator.storage?.persist?.().catch(() => {});
 }
 
 // ---------- collegamento ----------
@@ -499,6 +505,7 @@ if (location.hash.startsWith("#c=")) {
 config = leggiConfig();
 disegna();
 if (config) {
+  chiediPersistenza();
   collega().catch((e) => mostra(`Collegamento non riuscito: ${e.message}`, true));
 } else {
   stato.collegamento = "scollegato";
