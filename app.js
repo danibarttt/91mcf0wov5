@@ -37,6 +37,8 @@ const inAttesa = new Map(); // id comando -> {resolve, reject, timer}
 let visore = null; // {c, diretta, rinnovo, fine}
 let foglioLuce = null; // id della luce aperta nel pannello
 let trascinando = false;
+// sezioni a scomparsa aperte (all'avvio tutte chiuse; la pagina si ridisegna a ogni messaggio)
+const sezioniAperte = new Set();
 
 // ---------- utilità ----------
 
@@ -258,6 +260,15 @@ function sezione(titolo, corpo, nota = "") {
   return `<section class="sezione"><div class="sezione-testa"><h2>${titolo}</h2>${nota ? `<span class="nota">${nota}</span>` : ""}</div>${corpo}</section>`;
 }
 
+// sezione a scomparsa: "sotto" resta visibile anche da chiusa (lo stato a colpo d'occhio)
+function apribile(id, titolo, corpo, nota = "", sotto = "") {
+  const aperta = sezioniAperte.has(id) ? "open" : "";
+  return `<details class="sezione apribile" data-sezione="${id}" ${aperta}>
+    <summary><div class="sezione-testa"><h2>${titolo}</h2><span class="nota">${nota}${icona("giu", "freccia")}</span></div>${sotto}</summary>
+    ${corpo}
+  </details>`;
+}
+
 function htmlAbbina() {
   return `
     <section class="scheda abbina">
@@ -286,6 +297,7 @@ function htmlDashboard() {
     htmlPericoli([...di("fumo"), ...di("acqua")]),
     htmlTemperature(di("temperatura")),
     htmlRegistro(),
+    htmlVacanza(),
     `<div class="piede"><button data-azione="copia">Copia codice di abbinamento</button><button data-azione="dimentica">Dimentica questo telefono</button></div>`,
   ].join("");
 }
@@ -315,12 +327,6 @@ function htmlAllarme() {
       ? `<button data-azione="inserisci" class="bottone pericolo">${icona("scudoOk")}Accendi</button>`
       : `<button data-azione="disinserisci" class="bottone ${a.stato === "scattato" ? "pericolo" : "secondario"}">${icona("scudo")}Spegni</button>`;
   const dettaglio = a.stato === "scattato" ? esc(a.perche) : `${ora(a.dal)} · ${esc(a.perche)}`;
-  const [ins, dis] = a.orari || [];
-  const spiegazione = a.vacanza
-    ? "Non si accende e non si spegne da solo: resta come lo lasci"
-    : ins
-      ? `Si accende da solo alle ${esc(ins)} e si spegne alle ${esc(dis)}`
-      : "";
   return `
     <section class="scheda allarme" data-stato="${esc(a.stato)}">
       <div class="disco">${icona(simbolo)}</div>
@@ -330,12 +336,26 @@ function htmlAllarme() {
         <div class="dettaglio">${dettaglio}</div>
       </div>
       ${bottone}
-      <div class="vacanza ${a.vacanza ? "attiva" : ""}">
-        <span class="disco-piccolo">${icona("valigia")}</span>
-        <div class="testi"><div class="titolo">Modalità vacanza</div><div class="dettaglio">${spiegazione}</div></div>
-        <label class="interruttore" aria-label="Modalità vacanza"><input type="checkbox" data-vacanza ${a.vacanza ? "checked" : ""}><span></span></label>
-      </div>
     </section>`;
+}
+
+function htmlVacanza() {
+  const a = stato.allarme;
+  if (!a) return "";
+  const [ins, dis] = a.orari || [];
+  const spiegazione = a.vacanza
+    ? "L'allarme non si accende e non si spegne da solo: resta come lo lasci"
+    : ins
+      ? `L'allarme si accende da solo alle ${esc(ins)} e si spegne alle ${esc(dis)}`
+      : "";
+  return sezione(
+    "Modalità vacanza",
+    `<div class="scheda vacanza ${a.vacanza ? "attiva" : ""}">
+      <span class="disco-piccolo">${icona("valigia")}</span>
+      <div class="testi"><div class="titolo">${a.vacanza ? "Attiva" : "Non attiva"}</div><div class="dettaglio">${spiegazione}</div></div>
+      <label class="interruttore" aria-label="Modalità vacanza"><input type="checkbox" data-vacanza ${a.vacanza ? "checked" : ""}><span></span></label>
+    </div>`,
+  );
 }
 
 function htmlRiepilogo(sensori, porte, temperature) {
@@ -408,7 +428,8 @@ function htmlCamere() {
     const dentro = url ? `<img src="${url}" alt="">` : `<span class="vuota">${icona("camera")}</span>`;
     return `<button class="camera" data-azione="camera" data-c="${cam.c}">${dentro}<span class="nome">${esc(cam.n)}</span></button>`;
   });
-  return sezione("Camere", `<div class="camere">${riquadri.join("")}</div>`);
+  const n = stato.camere.length;
+  return apribile("camere", "Camere", `<div class="camere">${riquadri.join("")}</div>`, `${n} ${n === 1 ? "camera" : "camere"}`);
 }
 
 function iconaSensore(nome) {
@@ -433,8 +454,13 @@ function htmlPorte(porte) {
     const quando = s.q && s.aperto != null ? `<span class="quando">${s.aperto ? "aperto" : "chiuso"} ${ora(s.q)}</span>` : "";
     return `<li class="${s.aperto ? "aperto" : ""}"><span class="disco-piccolo">${icona(iconaSensore(s.n))}</span><span class="nome">${esc(etichetta(s.n))}${quando}</span>${chip}</li>`;
   });
-  const nota = aperti ? `${aperti} ${aperti === 1 ? "aperto" : "aperti"}` : "tutto chiuso";
-  return sezione("Porte e finestre", `<div class="scheda scheda-elenco"><ul class="elenco">${righe.join("")}</ul></div>`, nota);
+  // a colpo d'occhio, anche con la sezione chiusa: tutto chiuso, o quali sono aperti
+  const apertiNomi = porte.filter((s) => s.aperto);
+  const sotto = apertiNomi.length
+    ? `<div class="colpo-occhio">${apertiNomi.map((s) => `<span class="pillola attenzione">${icona(iconaSensore(s.n))}${esc(etichetta(s.n))}</span>`).join("")}</div>`
+    : `<div class="colpo-occhio"><span class="pillola ok">${icona("ok")}Tutto chiuso</span></div>`;
+  const nota = `${porte.length} sensori`;
+  return apribile("porte", "Porte e finestre", `<div class="scheda scheda-elenco"><ul class="elenco">${righe.join("")}</ul></div>`, nota, sotto);
 }
 
 function htmlPericoli(sensori) {
@@ -738,6 +764,17 @@ document.addEventListener("change", async (e) => {
     el.disabled = false;
   }
 });
+
+// ricorda quali sezioni a scomparsa sono aperte ("toggle" non risale: si ascolta in cattura)
+document.addEventListener(
+  "toggle",
+  (e) => {
+    const id = e.target.dataset?.sezione;
+    if (!id) return;
+    e.target.open ? sezioniAperte.add(id) : sezioniAperte.delete(id);
+  },
+  true,
+);
 
 document.addEventListener("keydown", (e) => {
   const el = e.target.closest?.('[role="button"][data-azione]');

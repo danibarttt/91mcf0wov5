@@ -94,6 +94,15 @@ main { max-width: 760px; margin: 0 auto; padding: 6px 16px 40px; }
   border: 1px solid var(--bordo); padding: 16px;
 }
 
+/* sezioni a scomparsa */
+.apribile > summary { list-style: none; cursor: pointer; }
+.apribile > summary::-webkit-details-marker { display: none; }
+.apribile .sezione-testa .nota { display: inline-flex; align-items: center; gap: 4px; }
+.apribile .freccia { width: 18px; height: 18px; transition: transform 0.2s; }
+.apribile[open] .freccia { transform: rotate(180deg); }
+.apribile[open] > summary { margin-bottom: 0; }
+.colpo-occhio { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+
 /* ---------- allarme ---------- */
 .allarme { display: flex; align-items: center; gap: 16px; padding: 18px; margin-top: 8px; }
 .allarme .disco {
@@ -114,18 +123,16 @@ main { max-width: 760px; margin: 0 auto; padding: 6px 16px 40px; }
 .allarme[data-stato="scattato"] .stato { color: var(--pericolo-testo); }
 @keyframes pulsa { 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--pericolo) 22%, transparent); } }
 .allarme { flex-wrap: wrap; }
-.allarme .vacanza {
-  flex-basis: 100%; display: flex; align-items: center; gap: 12px;
-  margin-top: 2px; padding-top: 14px; border-top: 1px solid var(--bordo);
-}
-.allarme .vacanza .disco-piccolo {
-  width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex: none;
+.vacanza { display: flex; align-items: center; gap: 12px; }
+.vacanza .disco-piccolo {
+  width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex: none;
   background: var(--carta-2); color: var(--tenue);
 }
-.allarme .vacanza .disco-piccolo .ic { width: 19px; height: 19px; }
-.allarme .vacanza.attiva .disco-piccolo { background: var(--accento-tenue); color: var(--accento); }
-.allarme .vacanza .titolo { font-weight: 700; font-size: 15px; }
-.allarme .vacanza .dettaglio { font-size: 13px; }
+.vacanza .disco-piccolo .ic { width: 20px; height: 20px; }
+.vacanza.attiva .disco-piccolo { background: var(--accento-tenue); color: var(--accento); }
+.vacanza .testi { flex: 1; min-width: 0; }
+.vacanza .titolo { font-weight: 700; font-size: 15px; }
+.vacanza .dettaglio { font-size: 13px; color: var(--tenue); }
 @media (max-width: 460px) {
   .allarme .bottone { width: 100%; }
 }
