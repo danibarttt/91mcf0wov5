@@ -2,9 +2,9 @@
 // end-to-end (cifra.js): la pagina non contiene dati, li riceve dal brain. Protocollo in
 // brain/casa_brain/dashboard.py.
 
-import { Mqtt } from "./mqtt.js?v=f80fd4af";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=f80fd4af";
-import { icona } from "./icone.js?v=f80fd4af";
+import { Mqtt } from "./mqtt.js?v=d0788d1c";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=d0788d1c";
+import { icona } from "./icone.js?v=d0788d1c";
 
 const ARCHIVIO = "casa";
 const PORTA_WS = 8084;

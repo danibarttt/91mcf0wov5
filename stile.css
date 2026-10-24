@@ -133,10 +133,10 @@ main.entra > *:nth-child(n + 4) { animation-delay: 0.12s; }
 .allarme .stato { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin: 1px 0 2px; }
 .allarme .dettaglio { color: var(--tenue); font-size: 14px; overflow-wrap: anywhere; }
 .allarme[data-stato="disinserito"] .stato { color: var(--tenue); }
-.allarme[data-stato="inserito"] { border-color: color-mix(in srgb, var(--pericolo) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--pericolo-tenue) 70%, var(--carta)), var(--carta)); }
+.allarme[data-stato="inserito"] { border-color: color-mix(in srgb, var(--pericolo) 45%, transparent); background-image: linear-gradient(135deg, color-mix(in srgb, var(--pericolo-tenue) 70%, var(--carta)), var(--carta)); }
 .allarme[data-stato="inserito"] .disco { background: var(--pericolo); color: #fff; box-shadow: 0 0 18px color-mix(in srgb, var(--pericolo) 40%, transparent); }
 .allarme[data-stato="inserito"] .stato { color: var(--pericolo-testo); }
-.allarme[data-stato="scattato"] { background: linear-gradient(135deg, var(--pericolo-tenue), var(--carta)); border-color: var(--pericolo); }
+.allarme[data-stato="scattato"] { background-image: linear-gradient(135deg, var(--pericolo-tenue), var(--carta)); border-color: var(--pericolo); }
 .allarme[data-stato="scattato"] .disco { background: var(--pericolo); color: #fff; animation: pulsa 1.1s ease-in-out infinite; }
 .allarme[data-stato="scattato"] .stato { color: var(--pericolo-testo); }
 @keyframes pulsa { 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--pericolo) 22%, transparent); } }
@@ -209,10 +209,11 @@ button:disabled { opacity: 0.55; cursor: default; }
   background: var(--carta); box-shadow: var(--ombra); cursor: pointer; min-height: 128px;
   transition: background 0.3s;
 }
-.luce[data-accesa="1"] { background: linear-gradient(160deg, color-mix(in srgb, var(--colore) 26%, var(--carta)), var(--carta) 80%); }
-/* le sfumature partono dal bordo esterno: altrimenti si ripetono sotto il bordo e in basso
-   compare una riga del colore di partenza */
-.luce, .allarme { background-origin: border-box; background-repeat: no-repeat; }
+.luce[data-accesa="1"] { background-image: linear-gradient(160deg, color-mix(in srgb, var(--colore) 26%, var(--carta)), var(--carta) 80%); }
+/* fondo e sfumatura si fermano dentro il bordo e non si ripetono: altrimenti in basso
+   compare una riga del colore della sfumatura. Le sfumature vanno date con
+   background-image: la forma breve "background:" rimetterebbe ripetizione e origine. */
+.luce, .allarme, .camera { background-clip: padding-box; background-origin: padding-box; background-repeat: no-repeat; }
 .luce .riga { display: flex; align-items: flex-start; justify-content: space-between; }
 .icona-luce {
   width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none;
@@ -235,7 +236,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .camere { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
 .camera {
   position: relative; aspect-ratio: 16 / 10; border-radius: var(--raggio-s); overflow: hidden; padding: 0; cursor: pointer;
-  border: 1px solid var(--bordo); background: linear-gradient(145deg, var(--sfondo-2), var(--carta-2)); box-shadow: var(--ombra);
+  border: 1px solid var(--bordo); background-image: linear-gradient(145deg, var(--sfondo-2), var(--carta-2)); box-shadow: var(--ombra);
 }
 .camera img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .camera .vuota { position: absolute; inset: 0; display: grid; place-items: center; color: var(--tenue); }
