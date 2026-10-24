@@ -9,8 +9,8 @@
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex, nofollow">
   <title>Casa</title>
-  <meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#111418" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#eef1f5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Casa">
@@ -23,32 +23,62 @@
 </head>
 <body>
   <header class="barra">
-    <h1>Casa</h1>
+    <div>
+      <h1>Casa</h1>
+      <p id="saluto" class="saluto"></p>
+    </div>
     <span id="collegamento" class="collegamento" data-stato="collegamento"><i></i><span>…</span></span>
   </header>
   <main id="app"></main>
 
-  <dialog id="conferma">
+  <dialog id="conferma" class="foglio">
     <form method="dialog">
       <h2 id="conferma-titolo"></h2>
       <div class="azioni">
-        <button value="annulla" class="secondario">Annulla</button>
-        <button value="ok" id="conferma-ok" class="primario"></button>
+        <button value="annulla" class="bottone secondario">Annulla</button>
+        <button value="ok" id="conferma-ok" class="bottone primario"></button>
       </div>
     </form>
   </dialog>
 
-  <dialog id="visore" class="visore">
-    <div class="visore-testa">
-      <h2 id="visore-nome"></h2>
-      <button id="visore-chiudi" class="secondario" aria-label="Chiudi">Chiudi</button>
+  <dialog id="luce" class="foglio">
+    <div class="foglio-testa">
+      <span id="luce-icona" class="icona-luce"></span>
+      <div class="foglio-titolo">
+        <h2 id="luce-nome"></h2>
+        <p id="luce-stato"></p>
+      </div>
+      <label class="interruttore" aria-label="Accesa">
+        <input id="luce-accesa" type="checkbox"><span></span>
+      </label>
     </div>
-    <div class="visore-foto"><img id="visore-img" alt=""><p id="visore-attesa">Chiedo la foto…</p></div>
+    <div class="cursore">
+      <div class="cursore-testa"><span>Luminosità</span><output id="luce-lum-v"></output></div>
+      <input id="luce-lum" class="slider slider-lum" type="range" min="1" max="100" step="1">
+    </div>
+    <div class="cursore">
+      <div class="cursore-testa"><span>Bianco</span><output id="luce-k-v"></output></div>
+      <input id="luce-k" class="slider slider-k" type="range" step="100">
+    </div>
+    <div class="cursore">
+      <div class="cursore-testa"><span>Colore</span><output id="luce-h-v"></output></div>
+      <input id="luce-h" class="slider slider-h" type="range" min="0" max="359" step="1">
+    </div>
     <div class="azioni">
-      <button id="visore-foto" class="secondario">Nuova foto</button>
-      <button id="visore-diretta" class="primario">Diretta</button>
+      <button id="luce-chiudi" class="bottone secondario">Chiudi</button>
     </div>
-    <p class="nota" id="visore-nota"></p>
+  </dialog>
+
+  <dialog id="visore" class="foglio visore">
+    <div class="foglio-testa">
+      <div class="foglio-titolo"><h2 id="visore-nome"></h2><p id="visore-nota"></p></div>
+      <button id="visore-chiudi" class="bottone-icona" aria-label="Chiudi"></button>
+    </div>
+    <div class="visore-foto"><img id="visore-img" alt=""><p id="visore-attesa">Chiedo la foto…</p><span id="visore-live" class="live" hidden>LIVE</span></div>
+    <div class="azioni">
+      <button id="visore-foto" class="bottone secondario">Nuova foto</button>
+      <button id="visore-diretta" class="bottone primario">Diretta</button>
+    </div>
   </dialog>
 
   <div id="avviso" class="avviso" role="status" hidden></div>
