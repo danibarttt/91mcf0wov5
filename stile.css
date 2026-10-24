@@ -192,6 +192,9 @@ button:disabled { opacity: 0.55; cursor: default; }
   transition: background 0.3s;
 }
 .luce[data-accesa="1"] { background: linear-gradient(160deg, color-mix(in srgb, var(--colore) 26%, var(--carta)), var(--carta) 80%); }
+/* le sfumature partono dal bordo esterno: altrimenti si ripetono sotto il bordo e in basso
+   compare una riga del colore di partenza */
+.luce, .allarme { background-origin: border-box; background-repeat: no-repeat; }
 .luce .riga { display: flex; align-items: flex-start; justify-content: space-between; }
 .icona-luce {
   width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none;
