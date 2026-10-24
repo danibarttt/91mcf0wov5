@@ -20,6 +20,7 @@ const stato = {
   brain: null, // {online, dal}
   allarme: null, // {stato, perche, dal}
   camere: [], // [{c, n}]
+  luci: [], // [{id, n, acceso, lum}]
   sensori: new Map(), // id -> {n, g, aperto, fumo, acqua, temp, batt, batt_bassa, q}
   foto: new Map(), // canale -> objectURL
   registro: null,
@@ -116,7 +117,7 @@ async function collega() {
     clientId: `casa-web-${casuale(5)}`,
     utente: config.u,
     password: config.p,
-    argomenti: ["casa/brain", "casa/allarme", "casa/camere", "casa/risposte", "casa/sensori/+", "casa/foto/+"],
+    argomenti: ["casa/brain", "casa/allarme", "casa/camere", "casa/luci", "casa/risposte", "casa/sensori/+", "casa/foto/+"],
     onMessaggio: (topic, payload) => messaggio(topic, payload).catch((e) => console.error(topic, e)),
     onStato: (s, motivo) => {
       stato.collegamento = s;
@@ -155,6 +156,7 @@ async function messaggio(topic, payload) {
   if (topic === "casa/brain") stato.brain = obj;
   else if (topic === "casa/allarme") stato.allarme = obj;
   else if (topic === "casa/camere") stato.camere = obj;
+  else if (topic === "casa/luci") stato.luci = obj;
   else if (topic.startsWith("casa/sensori/")) stato.sensori.set(topic.slice(13), obj);
   aggiornaCollegamento();
   disegna();
@@ -223,6 +225,7 @@ function htmlDashboard() {
     htmlAllarme(),
     htmlAvvisi(sensori),
     htmlCamere(),
+    htmlLuci(),
     htmlPorte(di("porte")),
     htmlPericoli([...di("fumo"), ...di("acqua")]),
     htmlTemperature(di("temperatura")),
@@ -293,6 +296,19 @@ function htmlCamere() {
   return `<section class="scheda"><h2>Camere</h2><div class="camere">${riquadri.join("")}</div></section>`;
 }
 
+function htmlLuci() {
+  if (!stato.luci.length) return "";
+  const righe = stato.luci.map((l) => {
+    if (l.acceso == null) return `<li><span class="nome">${esc(l.n)}</span><span class="etichetta neutra">Non risponde</span></li>`;
+    const testo = l.acceso ? `Accesa${l.lum != null ? ` · ${l.lum}%` : ""}` : "Spenta";
+    return `<li><span class="nome">${esc(l.n)}<span class="quando">${testo}</span></span>
+      <button data-azione="luce" data-id="${esc(l.id)}" data-accesa="${l.acceso ? "0" : "1"}" class="${l.acceso ? "secondario" : "primario"}">${l.acceso ? "Spegni" : "Accendi"}</button></li>`;
+  });
+  const accese = stato.luci.some((l) => l.acceso);
+  return `<section class="scheda"><h2>Luci</h2><ul class="elenco">${righe.join("")}</ul>
+    ${accese ? `<div class="azioni"><button data-azione="spegni_luci" class="secondario">Spegni tutte</button></div>` : ""}</section>`;
+}
+
 function htmlPorte(porte) {
   if (!porte.length) return "";
   porte.sort((a, b) => Number(Boolean(b.aperto)) - Number(Boolean(a.aperto)) || etichetta(a.n).localeCompare(etichetta(b.n)));
@@ -334,7 +350,7 @@ function htmlTemperature(sensori) {
   return `<section class="scheda"><h2>Temperature</h2><ul class="elenco">${righe.join("")}</ul></section>`;
 }
 
-const TIPI = { contatto: "Contatto", persona: "Persona", fumo: "Fumo", acqua: "Acqua", bottone: "Bottone", temperatura: "Temperatura", allarme: "Allarme", avvio: "Avvio", dashboard: "Dashboard" };
+const TIPI = { luci: "Luci", contatto: "Contatto", persona: "Persona", fumo: "Fumo", acqua: "Acqua", bottone: "Bottone", temperatura: "Temperatura", allarme: "Allarme", avvio: "Avvio", dashboard: "Dashboard" };
 
 function voceRegistro([quando, tipo, fonte, testo]) {
   let cosa;
@@ -342,6 +358,7 @@ function voceRegistro([quando, tipo, fonte, testo]) {
   else if (tipo === "contatto") cosa = `${etichetta(fonte)}: ${testo === "True" ? "aperto" : "chiuso"}`;
   else if (["fumo", "acqua", "persona"].includes(tipo)) cosa = `${TIPI[tipo]} · ${etichetta(fonte)}: ${testo === "True" ? "rilevato" : "cessato"}`;
   else if (tipo === "bottone") cosa = `${etichetta(fonte)} premuto`;
+  else if (tipo === "luci") cosa = `Luci ${testo} (${fonte})`;
   else cosa = `${TIPI[tipo] || tipo} · ${etichetta(fonte)}: ${testo}`;
   const hm = new Date(quando).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
   return `<li><span class="quando">${hm}</span>${esc(cosa)}</li>`;
@@ -438,6 +455,11 @@ async function esegui(azione, el) {
       if (!(await conferma("Disinserire l'allarme?", "Disinserisci", stato.allarme?.stato === "scattato"))) return;
       await comando("disinserisci");
       return mostra("Allarme disinserito");
+    case "luce":
+      return comando("luce", { id: el.dataset.id, accesa: el.dataset.accesa === "1" });
+    case "spegni_luci":
+      await comando("spegni_luci");
+      return mostra("Luci spente");
     case "silenzia":
       await comando("silenzia");
       return mostra("Sirene zittite");

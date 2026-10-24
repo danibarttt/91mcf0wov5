@@ -105,6 +105,8 @@ button:disabled { opacity: 0.5; cursor: default; }
 .elenco li:first-child { border-top: 0; padding-top: 2px; }
 .elenco .nome { min-width: 0; }
 .elenco .quando { display: block; color: var(--tenue); font-size: 13px; }
+.elenco li > button { min-height: 38px; padding: 7px 14px; flex: none; }
+.scheda > .azioni { margin-top: 10px; }
 
 .etichetta { flex: none; font-size: 13px; font-weight: 600; padding: 3px 9px; border-radius: 99px; background: var(--ok-tenue); color: var(--ok); }
 .etichetta.attenzione { background: var(--attenzione-tenue); color: var(--attenzione); }
