@@ -308,13 +308,19 @@ function htmlAppenaAbbinato() {
 function htmlAllarme() {
   const a = stato.allarme;
   if (!a) return `<section class="scheda allarme"><div class="disco">${icona("scudo")}</div><div class="testi"><div class="stato">In attesa di casa…</div></div></section>`;
-  const titolo = { disinserito: "Disinserito", inserito: "Inserito", scattato: "Scattato!" }[a.stato] || a.stato;
+  const titolo = { disinserito: "Spento", inserito: "Acceso", scattato: "Scattato!" }[a.stato] || a.stato;
   const simbolo = { disinserito: "scudo", inserito: "scudoOk", scattato: "scudoAllarme" }[a.stato] || "scudo";
   const bottone =
     a.stato === "disinserito"
-      ? `<button data-azione="inserisci" class="bottone primario">${icona("scudoOk")}Inserisci</button>`
-      : `<button data-azione="disinserisci" class="bottone ${a.stato === "scattato" ? "pericolo" : "secondario"}">${icona("scudo")}Disinserisci</button>`;
+      ? `<button data-azione="inserisci" class="bottone pericolo">${icona("scudoOk")}Accendi</button>`
+      : `<button data-azione="disinserisci" class="bottone ${a.stato === "scattato" ? "pericolo" : "secondario"}">${icona("scudo")}Spegni</button>`;
   const dettaglio = a.stato === "scattato" ? esc(a.perche) : `${ora(a.dal)} · ${esc(a.perche)}`;
+  const [ins, dis] = a.orari || [];
+  const spiegazione = a.vacanza
+    ? "Non si accende e non si spegne da solo: resta come lo lasci"
+    : ins
+      ? `Si accende da solo alle ${esc(ins)} e si spegne alle ${esc(dis)}`
+      : "";
   return `
     <section class="scheda allarme" data-stato="${esc(a.stato)}">
       <div class="disco">${icona(simbolo)}</div>
@@ -324,6 +330,11 @@ function htmlAllarme() {
         <div class="dettaglio">${dettaglio}</div>
       </div>
       ${bottone}
+      <div class="vacanza ${a.vacanza ? "attiva" : ""}">
+        <span class="disco-piccolo">${icona("valigia")}</span>
+        <div class="testi"><div class="titolo">Modalità vacanza</div><div class="dettaglio">${spiegazione}</div></div>
+        <label class="interruttore" aria-label="Modalità vacanza"><input type="checkbox" data-vacanza ${a.vacanza ? "checked" : ""}><span></span></label>
+      </div>
     </section>`;
 }
 
@@ -345,6 +356,7 @@ function htmlRiepilogo(sensori, porte, temperature) {
     const min = Math.min(...gradi), max = Math.max(...gradi);
     pillole.push(`<span class="pillola">${icona("termometro")}${min === max ? fmt(min) : `${fmt(min)}–${fmt(max)}`} °C</span>`);
   }
+  if (stato.allarme?.vacanza) pillole.unshift(`<span class="pillola vacanza">${icona("valigia")}In vacanza</span>`);
   if (sensori.some((s) => s.fumo || s.acqua)) pillole.unshift(`<span class="pillola pericolo">${icona("attenzione")}Pericolo</span>`);
   return `<div class="riepilogo">${pillole.join("")}</div>`;
 }
@@ -451,17 +463,21 @@ function htmlTemperature(sensori) {
   return sezione("Temperature", `<div class="tessere">${tessere.join("")}</div>`);
 }
 
-const ICONE_REGISTRO = { allarme: "scudo", contatto: "porta", persona: "persona", fumo: "fiamma", acqua: "goccia", bottone: "bottone", luci: "lampadina", avvio: "avvio", dashboard: "scudo", temperatura: "termometro" };
+const ICONE_REGISTRO = { vacanza: "valigia", allarme: "scudo", contatto: "porta", persona: "persona", fumo: "fiamma", acqua: "goccia", bottone: "bottone", luci: "lampadina", avvio: "avvio", dashboard: "scudo", temperatura: "termometro" };
 
 function voceRegistro([quando, tipo, fonte, testo]) {
   let cosa;
-  if (tipo === "allarme") cosa = `Allarme ${testo} <span class="ora">(${esc(fonte)})</span>`;
+  if (tipo === "allarme") {
+    const parola = { inserito: "acceso", disinserito: "spento", scattato: "scattato" }[testo] || testo;
+    cosa = `Allarme ${esc(parola)} <span class="ora">(${esc(fonte)})</span>`;
+  }
   else if (tipo === "contatto") cosa = `${esc(etichetta(fonte))}: ${testo === "True" ? "aperto" : "chiuso"}`;
   else if (tipo === "persona") cosa = `Persona vista: ${esc(fonte)}`;
   else if (tipo === "fumo" || tipo === "acqua") cosa = `${tipo === "fumo" ? "Fumo" : "Acqua"} ${testo === "True" ? "rilevato" : "cessato"}: ${esc(etichetta(fonte))}`;
   else if (tipo === "bottone") cosa = `${esc(etichetta(fonte))} premuto`;
   else if (tipo === "luci") cosa = `Luci ${esc(testo)} <span class="ora">(${esc(fonte)})</span>`;
   else if (tipo === "avvio") cosa = `Cervello avviato (${esc(testo)})`;
+  else if (tipo === "vacanza") cosa = `Modalità vacanza ${esc(testo)} <span class="ora">(${esc(fonte)})</span>`;
   else cosa = `${esc(maiuscola(tipo))} · ${esc(etichetta(fonte))}: ${esc(testo)}`;
   const hm = new Date(quando).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
   return `<li><span class="punto">${icona(ICONE_REGISTRO[tipo] || "orologio")}</span><div><div class="cosa">${cosa}</div><div class="ora">${hm}</div></div></li>`;
@@ -628,9 +644,11 @@ $("visore").addEventListener("close", () => {
 // ---------- azioni ----------
 
 // conferma contro i tocchi per sbaglio (niente PIN: basta essere abbinati)
-function conferma(titolo, bottone, pericolo = false) {
+function conferma(titolo, bottone, pericolo = false, testo = "") {
   const d = $("conferma");
   $("conferma-titolo").textContent = titolo;
+  $("conferma-testo").textContent = testo;
+  $("conferma-testo").hidden = !testo;
   $("conferma-ok").textContent = bottone;
   $("conferma-ok").className = `bottone ${pericolo ? "pericolo" : "primario"}`;
   d.returnValue = "";
@@ -641,13 +659,13 @@ function conferma(titolo, bottone, pericolo = false) {
 async function esegui(azione, el) {
   switch (azione) {
     case "inserisci":
-      if (!(await conferma("Inserire l'allarme?", "Inserisci"))) return;
+      if (!(await conferma("Accendere l'allarme?", "Accendi", true))) return;
       await comando("inserisci");
-      return mostra("Allarme inserito");
+      return mostra("Allarme acceso");
     case "disinserisci":
-      if (!(await conferma("Disinserire l'allarme?", "Disinserisci", stato.allarme?.stato === "scattato"))) return;
+      if (!(await conferma("Spegnere l'allarme?", "Spegni"))) return;
       await comando("disinserisci");
-      return mostra("Allarme disinserito");
+      return mostra("Allarme spento");
     case "silenzia":
       await comando("silenzia");
       return mostra("Sirene zittite");
@@ -692,6 +710,33 @@ document.addEventListener("click", (e) => {
   esegui(el.dataset.azione, el)
     .catch((err) => mostra(err.message || String(err), true))
     .finally(() => (el.disabled = false));
+});
+
+// interruttore della modalità vacanza (è nella scheda allarme, ridisegnata a ogni messaggio)
+document.addEventListener("change", async (e) => {
+  const el = e.target;
+  if (!el.matches?.("[data-vacanza]")) return;
+  const attiva = el.checked;
+  el.checked = !attiva; // cambia davvero solo dopo la conferma e la risposta di casa
+  const [ins, dis] = stato.allarme?.orari || ["01:30", "06:45"];
+  const ok = await conferma(
+    attiva ? "Attivare la modalità vacanza?" : "Finire la modalità vacanza?",
+    attiva ? "Attiva" : "Finisci",
+    false,
+    attiva
+      ? `L'allarme non si accenderà più da solo alle ${ins} e non si spegnerà alle ${dis}: resta come lo lasci. Ricordati di accenderlo quando parti.`
+      : `Tornano gli orari automatici: si accende alle ${ins} e si spegne alle ${dis}.`,
+  );
+  if (!ok) return;
+  el.disabled = true;
+  try {
+    await comando("vacanza", { attiva });
+    mostra(attiva ? "Modalità vacanza attiva" : "Modalità vacanza finita");
+  } catch (err) {
+    mostra(err.message, true);
+  } finally {
+    el.disabled = false;
+  }
 });
 
 document.addEventListener("keydown", (e) => {

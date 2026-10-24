@@ -16,8 +16,9 @@
   --ok-tenue: #dcf5e4;
   --attenzione: #b45309;
   --attenzione-tenue: #fff1d6;
-  --pericolo: #dc2626;
-  --pericolo-tenue: #ffe4e4;
+  --pericolo: #b91c1c;
+  --pericolo-testo: #b91c1c;
+  --pericolo-tenue: #fde4e4;
   --spenta: #9ca3af;
   --raggio: 20px;
   --raggio-s: 14px;
@@ -40,8 +41,9 @@
     --ok-tenue: #10261a;
     --attenzione: #e3a33a;
     --attenzione-tenue: #2b2010;
-    --pericolo: #ff6b6b;
-    --pericolo-tenue: #341516;
+    --pericolo: #b42318;
+    --pericolo-testo: #f0716a;
+    --pericolo-tenue: #2c1212;
     --spenta: #4b5563;
   }
 }
@@ -96,21 +98,35 @@ main { max-width: 760px; margin: 0 auto; padding: 6px 16px 40px; }
 .allarme { display: flex; align-items: center; gap: 16px; padding: 18px; margin-top: 8px; }
 .allarme .disco {
   width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; flex: none;
-  background: var(--ok-tenue); color: var(--ok);
+  background: var(--carta-2); color: var(--tenue);
 }
 .allarme .disco .ic { width: 32px; height: 32px; }
 .allarme .testi { flex: 1; min-width: 0; }
 .allarme .etichetta-piccola { font-size: 13px; color: var(--tenue); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
 .allarme .stato { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin: 1px 0 2px; }
 .allarme .dettaglio { color: var(--tenue); font-size: 14px; overflow-wrap: anywhere; }
-.allarme[data-stato="inserito"] .disco { background: var(--accento-tenue); color: var(--accento); }
-.allarme[data-stato="inserito"] .stato { color: var(--accento); }
+.allarme[data-stato="disinserito"] .stato { color: var(--tenue); }
+.allarme[data-stato="inserito"] { border-color: color-mix(in srgb, var(--pericolo) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--pericolo-tenue) 70%, var(--carta)), var(--carta)); }
+.allarme[data-stato="inserito"] .disco { background: var(--pericolo); color: #fff; box-shadow: 0 0 18px color-mix(in srgb, var(--pericolo) 40%, transparent); }
+.allarme[data-stato="inserito"] .stato { color: var(--pericolo-testo); }
 .allarme[data-stato="scattato"] { background: linear-gradient(135deg, var(--pericolo-tenue), var(--carta)); border-color: var(--pericolo); }
 .allarme[data-stato="scattato"] .disco { background: var(--pericolo); color: #fff; animation: pulsa 1.1s ease-in-out infinite; }
-.allarme[data-stato="scattato"] .stato { color: var(--pericolo); }
+.allarme[data-stato="scattato"] .stato { color: var(--pericolo-testo); }
 @keyframes pulsa { 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--pericolo) 22%, transparent); } }
+.allarme { flex-wrap: wrap; }
+.allarme .vacanza {
+  flex-basis: 100%; display: flex; align-items: center; gap: 12px;
+  margin-top: 2px; padding-top: 14px; border-top: 1px solid var(--bordo);
+}
+.allarme .vacanza .disco-piccolo {
+  width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex: none;
+  background: var(--carta-2); color: var(--tenue);
+}
+.allarme .vacanza .disco-piccolo .ic { width: 19px; height: 19px; }
+.allarme .vacanza.attiva .disco-piccolo { background: var(--accento-tenue); color: var(--accento); }
+.allarme .vacanza .titolo { font-weight: 700; font-size: 15px; }
+.allarme .vacanza .dettaglio { font-size: 13px; }
 @media (max-width: 460px) {
-  .allarme { flex-wrap: wrap; }
   .allarme .bottone { width: 100%; }
 }
 
@@ -125,8 +141,9 @@ main { max-width: 760px; margin: 0 auto; padding: 6px 16px 40px; }
 .pillola .ic { width: 18px; height: 18px; }
 .pillola.ok .ic { color: var(--ok); }
 .pillola.attenzione { background: var(--attenzione-tenue); color: var(--attenzione); }
-.pillola.pericolo { background: var(--pericolo-tenue); color: var(--pericolo); }
+.pillola.pericolo { background: var(--pericolo-tenue); color: var(--pericolo-testo); }
 .pillola.luminosa .ic { color: #f5b301; }
+.pillola.vacanza { background: var(--accento-tenue); color: var(--accento); }
 
 /* ---------- avvisi ---------- */
 .avvisi { border-color: color-mix(in srgb, var(--attenzione) 40%, transparent); background: var(--attenzione-tenue); margin-top: 14px; }
@@ -134,7 +151,7 @@ main { max-width: 760px; margin: 0 auto; padding: 6px 16px 40px; }
 .avvisi ul { list-style: none; margin: 0; padding: 0; }
 .avvisi li { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-weight: 600; }
 .avvisi li .ic { color: var(--attenzione); }
-.avvisi.grave li .ic { color: var(--pericolo); }
+.avvisi.grave li .ic { color: var(--pericolo-testo); }
 .avvisi .azioni { margin-top: 10px; }
 
 /* ---------- bottoni ---------- */
@@ -215,7 +232,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 
 .etichetta { flex: none; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: var(--ok-tenue); color: var(--ok); }
 .etichetta.attenzione { background: var(--attenzione-tenue); color: var(--attenzione); }
-.etichetta.pericolo { background: var(--pericolo-tenue); color: var(--pericolo); }
+.etichetta.pericolo { background: var(--pericolo-tenue); color: var(--pericolo-testo); }
 .etichetta.neutra { background: var(--carta-2); color: var(--tenue); }
 
 .tessere { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
@@ -224,9 +241,9 @@ button:disabled { opacity: 0.55; cursor: default; }
 .tessera .testa .ic { width: 18px; height: 18px; }
 .tessera .valore { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-top: 6px; }
 .tessera .valore small { font-size: 15px; font-weight: 600; color: var(--tenue); }
-.tessera.caldo .valore { color: var(--pericolo); }
+.tessera.caldo .valore { color: var(--pericolo-testo); }
 .tessera.pericolo { background: var(--pericolo-tenue); border-color: var(--pericolo); }
-.tessera.pericolo .valore, .tessera.pericolo .testa { color: var(--pericolo); }
+.tessera.pericolo .valore, .tessera.pericolo .testa { color: var(--pericolo-testo); }
 .tessera .valore.ok { color: var(--ok); font-size: 18px; }
 .tessera .valore.muto { color: var(--tenue); font-size: 18px; }
 
@@ -250,6 +267,8 @@ dialog.foglio {
 dialog::backdrop { background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(2px); }
 dialog h2 { margin: 0; font-size: 19px; }
 dialog form h2 { margin-bottom: 18px; }
+.conferma-testo { margin: -8px 0 18px; color: var(--tenue); font-size: 15px; line-height: 1.45; }
+.conferma-testo[hidden] { display: none; }
 .foglio-testa { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
 .foglio-titolo { flex: 1; min-width: 0; }
 .foglio-titolo p { margin: 2px 0 0; color: var(--tenue); font-size: 14px; }
