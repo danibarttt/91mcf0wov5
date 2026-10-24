@@ -166,6 +166,7 @@ async function collega() {
       stato.collegamento = s;
       stato.motivo = motivo || "";
       aggiornaCollegamento();
+      if (!stato.allarme) disegna(); // aggiorna il testo sotto lo spinner
     },
   });
   client.apri();
@@ -251,7 +252,14 @@ function disegna() {
   requestAnimationFrame(() => {
     disegnoInAttesa = false;
     const app = $("app");
-    app.innerHTML = config ? htmlDashboard() : htmlAbbina();
+    // finché non arriva lo stato dell'allarme: schermata di caricamento, poi dissolvenza
+    const inAttesaDiCasa = config && !stato.allarme;
+    app.innerHTML = !config ? htmlAbbina() : inAttesaDiCasa ? htmlCaricamento() : htmlDashboard();
+    if (!inAttesaDiCasa && app.dataset.pronta !== "1") {
+      app.dataset.pronta = "1";
+      app.classList.add("entra"); // solo alla prima comparsa, non a ogni ridisegno
+      setTimeout(() => app.classList.remove("entra"), 800);
+    }
     applicaColori(app);
   });
 }
@@ -267,6 +275,15 @@ function apribile(id, titolo, corpo, nota = "", sotto = "") {
     <summary><div class="sezione-testa"><h2>${titolo}</h2><span class="nota">${nota}${icona("giu", "freccia")}</span></div>${sotto}</summary>
     ${corpo}
   </details>`;
+}
+
+function htmlCaricamento() {
+  const errore = stato.collegamento === "scollegato" && stato.motivo === "credenziali rifiutate";
+  if (errore) {
+    return `<div class="caricamento"><div class="disco-errore">${icona("attenzione")}</div><p>Credenziali rifiutate: riabbina il telefono col QR.</p></div>`;
+  }
+  const testo = stato.collegamento === "collegato" ? "Aspetto i dati di casa…" : "Mi collego a casa…";
+  return `<div class="caricamento"><div class="spinner" role="progressbar" aria-label="Caricamento"></div><p>${testo}</p></div>`;
 }
 
 function htmlAbbina() {
@@ -417,7 +434,7 @@ function htmlLuci() {
       </div>`;
   });
   const accese = stato.luci.some((l) => l.acceso);
-  const nota = accese ? `<button data-azione="spegni_luci" class="bottone-testo">Spegni tutte</button>` : "";
+  const nota = accese ? `<button data-azione="spegni_luci" class="bottone-testo">Spegni luci in casa</button>` : "";
   return sezione("Luci", `<div class="luci">${riquadri.join("")}</div>`, nota);
 }
 
@@ -476,7 +493,12 @@ function htmlPericoli(sensori) {
           : `<div class="valore ok">Tutto ok</div>`;
     return `<div class="tessera ${allarme ? "pericolo" : ""}"><div class="testa">${icona(fumo ? "fiamma" : "goccia")}${esc(maiuscola(etichetta(s.n).replace(/^(fumo|acqua)\s+/i, "")))}</div>${valore}</div>`;
   });
-  return sezione("Fumo e acqua", `<div class="tessere">${tessere.join("")}</div>`);
+  // a colpo d'occhio: tutto ok, o quali sensori segnalano
+  const allarmi = sensori.filter((s) => (s.g.includes("fumo") ? s.fumo : s.acqua));
+  const sotto = allarmi.length
+    ? `<div class="colpo-occhio">${allarmi.map((s) => `<span class="pillola pericolo">${icona(s.g.includes("fumo") ? "fiamma" : "goccia")}${esc(etichetta(s.n))}</span>`).join("")}</div>`
+    : `<div class="colpo-occhio"><span class="pillola ok">${icona("ok")}Tutto ok</span></div>`;
+  return apribile("pericoli", "Fumo e acqua", `<div class="tessere">${tessere.join("")}</div>`, `${sensori.length} sensori`, sotto);
 }
 
 function htmlTemperature(sensori) {
@@ -486,7 +508,15 @@ function htmlTemperature(sensori) {
     const nome = etichetta(s.n).replace(/^temperatura\s+/i, "");
     return `<div class="tessera ${s.temp >= 50 ? "caldo" : ""}"><div class="testa">${icona("termometro")}${esc(maiuscola(nome))}</div><div class="valore">${s.temp.toLocaleString("it-IT")}<small> °C</small></div></div>`;
   });
-  return sezione("Temperature", `<div class="tessere">${tessere.join("")}</div>`);
+  // a colpo d'occhio: l'intervallo, e in rosso i sensori oltre la soglia
+  const fmt = (v) => v.toLocaleString("it-IT");
+  const gradi = con.map((s) => s.temp);
+  const min = Math.min(...gradi), max = Math.max(...gradi);
+  const caldi = con.filter((s) => s.temp >= 50);
+  const sotto = `<div class="colpo-occhio"><span class="pillola">${icona("termometro")}${min === max ? fmt(min) : `${fmt(min)}–${fmt(max)}`} °C</span>${caldi
+    .map((s) => `<span class="pillola pericolo">${icona("termometro")}${esc(etichetta(s.n))}: ${fmt(s.temp)} °C</span>`)
+    .join("")}</div>`;
+  return apribile("temperature", "Temperature", `<div class="tessere">${tessere.join("")}</div>`, `${con.length} sensori`, sotto);
 }
 
 const ICONE_REGISTRO = { vacanza: "valigia", allarme: "scudo", contatto: "porta", persona: "persona", fumo: "fiamma", acqua: "goccia", bottone: "bottone", luci: "lampadina", avvio: "avvio", dashboard: "scudo", temperatura: "termometro" };
@@ -510,12 +540,27 @@ function voceRegistro([quando, tipo, fonte, testo]) {
 }
 
 function htmlRegistro() {
-  if (stato.registro == null) {
-    return sezione("Registro", `<button data-azione="registro" class="bottone secondario">${icona("orologio")}Mostra le ultime 24 ore</button>`);
+  // si carica quando si apre la sezione (vedi l'ascolto di "toggle")
+  let corpo;
+  if (stato.registro == null) corpo = `<p class="vuoto">Carico…</p>`;
+  else {
+    const voci = [...stato.registro].reverse().map(voceRegistro);
+    corpo = voci.length ? `<ul class="registro">${voci.join("")}</ul>` : `<p class="vuoto">Niente da segnalare.</p>`;
   }
-  const voci = [...stato.registro].reverse().map(voceRegistro);
-  const corpo = voci.length ? `<ul class="registro">${voci.join("")}</ul>` : `<p class="vuoto">Niente da segnalare.</p>`;
-  return sezione("Registro", `<div class="scheda scheda-elenco">${corpo}</div>`, "ultime 24 ore");
+  const aggiorna = `<div class="azioni sinistra registro-azioni"><button data-azione="registro" class="bottone secondario">${icona("avvio")}Aggiorna</button></div>`;
+  return apribile("registro", "Registro", `<div class="scheda scheda-elenco">${corpo}</div>${aggiorna}`, "ultime 24 ore");
+}
+
+let registroInArrivo = null;
+function caricaRegistro() {
+  // una richiesta alla volta: ridisegnando, una sezione già aperta può rimandare "toggle"
+  registroInArrivo ??= comando("registro")
+    .then((voci) => {
+      stato.registro = voci;
+      disegna();
+    })
+    .finally(() => (registroInArrivo = null));
+  return registroInArrivo;
 }
 
 // ---------- pannello di una luce ----------
@@ -705,8 +750,7 @@ async function esegui(azione, el) {
     case "camera":
       return apriVisore(Number(el.dataset.c));
     case "registro":
-      stato.registro = await comando("registro");
-      return disegna();
+      return caricaRegistro();
     case "dimentica":
       if (!(await conferma("Dimenticare questo telefono? Servirà di nuovo il QR di abbinamento.", "Dimentica", true))) return;
       localStorage.removeItem(ARCHIVIO);
@@ -772,6 +816,9 @@ document.addEventListener(
     const id = e.target.dataset?.sezione;
     if (!id) return;
     e.target.open ? sezioniAperte.add(id) : sezioniAperte.delete(id);
+    if (id === "registro" && e.target.open && stato.registro == null) {
+      caricaRegistro().catch((err) => mostra(err.message, true));
+    }
   },
   true,
 );
