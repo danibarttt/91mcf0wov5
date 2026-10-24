@@ -2,9 +2,9 @@
 // end-to-end (cifra.js): la pagina non contiene dati, li riceve dal brain. Protocollo in
 // brain/casa_brain/dashboard.py.
 
-import { Mqtt } from "./mqtt.js";
-import { importaChiave, cifra, decifra } from "./cifra.js";
-import { icona } from "./icone.js";
+import { Mqtt } from "./mqtt.js?v=f80fd4af";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=f80fd4af";
+import { icona } from "./icone.js?v=f80fd4af";
 
 const ARCHIVIO = "casa";
 const PORTA_WS = 8084;
@@ -336,7 +336,7 @@ function htmlAppenaAbbinato() {
 
 function htmlAllarme() {
   const a = stato.allarme;
-  if (!a) return `<section class="scheda allarme"><div class="disco">${icona("scudo")}</div><div class="testi"><div class="stato">In attesa di casa…</div></div></section>`;
+  if (!a) return ""; // non succede: senza stato dell'allarme si vede la schermata di caricamento
   const titolo = { disinserito: "Spento", inserito: "Acceso", scattato: "Scattato!" }[a.stato] || a.stato;
   const simbolo = { disinserito: "scudo", inserito: "scudoOk", scattato: "scudoAllarme" }[a.stato] || "scudo";
   const bottone =
