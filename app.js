@@ -90,6 +90,11 @@ function decodificaCodice(testo) {
   return c;
 }
 
+function codiceDa(c) {
+  const json = JSON.stringify({ h: c.h, u: c.u, p: c.p, k: c.k });
+  return btoa(String.fromCharCode(...enc.encode(json))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 function abbina(testo) {
   const c = decodificaCodice(testo);
   localStorage.setItem(ARCHIVIO, JSON.stringify(c));
@@ -216,7 +221,7 @@ function htmlDashboard() {
     htmlPericoli([...di("fumo"), ...di("acqua")]),
     htmlTemperature(di("temperatura")),
     htmlRegistro(),
-    `<div class="piede"><button data-azione="dimentica">Dimentica questo telefono</button></div>`,
+    `<div class="piede"><button data-azione="copia">Copia codice di abbinamento</button> · <button data-azione="dimentica">Dimentica questo telefono</button></div>`,
   ].join("");
 }
 
@@ -441,7 +446,8 @@ async function esegui(azione, el) {
       if (client) client.chiudi();
       return location.reload();
     case "copia":
-      await navigator.clipboard.writeText(stato.abbinato);
+      // ricavato dall'abbinamento salvato: serve per passarlo da Safari all'app sulla Home
+      await navigator.clipboard.writeText(stato.abbinato || codiceDa(config));
       return mostra("Codice copiato");
     case "fatto":
       stato.abbinato = null;
