@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=a51d589d";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=a51d589d";
-import { stato } from "./stato.js?v=a51d589d";
+import { Mqtt } from "./mqtt.js?v=88c049d4";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=88c049d4";
+import { stato } from "./stato.js?v=88c049d4";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const PORTA_WS = 8084;
@@ -133,9 +133,11 @@ export async function comando(azione, argomenti = {}) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       inAttesa.delete(id);
+      contaInAttesa();
       reject(new Error("Casa non ha risposto"));
     }, ATTESA_RISPOSTA_MS);
     inAttesa.set(id, { resolve, reject, timer });
+    contaInAttesa();
     client.pubblica(`${P}/comandi`, blob);
   });
 }
@@ -144,8 +146,15 @@ function risposta(r) {
   const p = inAttesa.get(r.id);
   if (!p) return; // risposta a un altro telefono
   inAttesa.delete(r.id);
+  contaInAttesa();
   clearTimeout(p.timer);
   r.ok ? p.resolve(r.dati) : p.reject(new Error(r.errore || "Errore"));
+}
+
+// quanti comandi aspettano risposta, sull'elemento <html>: le prove (prove/) controllano che
+// ognuno abbia avuto la sua
+function contaInAttesa() {
+  document.documentElement.dataset.comandiInAttesa = inAttesa.size;
 }
 
 function casuale(byte = 12) {
