@@ -1,4 +1,4 @@
-// Cifratura end-to-end, gemella di brain/casa_brain/cifra.py: AES-256-GCM, messaggio =
+// Cifratura end-to-end, gemella di cervello/casa/dashboard/cifra.py: AES-256-GCM, messaggio =
 // nonce (12 byte) + testo cifrato con tag, topic MQTT come dato associato.
 
 const enc = new TextEncoder();

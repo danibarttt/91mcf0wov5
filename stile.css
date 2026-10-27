@@ -132,10 +132,10 @@ main.entra > *:nth-child(n + 4) { animation-delay: 0.12s; }
 .allarme .etichetta-piccola { font-size: 13px; color: var(--tenue); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
 .allarme .stato { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin: 1px 0 2px; }
 .allarme .dettaglio { color: var(--tenue); font-size: 14px; overflow-wrap: anywhere; }
-.allarme[data-stato="disinserito"] .stato { color: var(--tenue); }
-.allarme[data-stato="inserito"] { border-color: color-mix(in srgb, var(--pericolo) 45%, transparent); background-image: linear-gradient(135deg, color-mix(in srgb, var(--pericolo-tenue) 70%, var(--carta)), var(--carta)); }
-.allarme[data-stato="inserito"] .disco { background: var(--pericolo); color: #fff; box-shadow: 0 0 18px color-mix(in srgb, var(--pericolo) 40%, transparent); }
-.allarme[data-stato="inserito"] .stato { color: var(--pericolo-testo); }
+.allarme[data-stato="spento"] .stato { color: var(--tenue); }
+.allarme[data-stato="acceso"] { border-color: color-mix(in srgb, var(--pericolo) 45%, transparent); background-image: linear-gradient(135deg, color-mix(in srgb, var(--pericolo-tenue) 70%, var(--carta)), var(--carta)); }
+.allarme[data-stato="acceso"] .disco { background: var(--pericolo); color: #fff; box-shadow: 0 0 18px color-mix(in srgb, var(--pericolo) 40%, transparent); }
+.allarme[data-stato="acceso"] .stato { color: var(--pericolo-testo); }
 .allarme[data-stato="scattato"] { background-image: linear-gradient(135deg, var(--pericolo-tenue), var(--carta)); border-color: var(--pericolo); }
 .allarme[data-stato="scattato"] .disco { background: var(--pericolo); color: #fff; animation: pulsa 1.1s ease-in-out infinite; }
 .allarme[data-stato="scattato"] .stato { color: var(--pericolo-testo); }
