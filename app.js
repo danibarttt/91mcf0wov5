@@ -2,9 +2,9 @@
 // end-to-end (cifra.js): la pagina non contiene dati, li riceve dal brain. Protocollo in
 // brain/casa_brain/dashboard.py.
 
-import { Mqtt } from "./mqtt.js?v=d0788d1c";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=d0788d1c";
-import { icona } from "./icone.js?v=d0788d1c";
+import { Mqtt } from "./mqtt.js?v=bee027af";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=bee027af";
+import { icona } from "./icone.js?v=bee027af";
 
 const ARCHIVIO = "casa";
 const PORTA_WS = 8084;
@@ -26,7 +26,6 @@ const stato = {
   sensori: new Map(), // id -> {n, g, aperto, fumo, acqua, temp, batt, batt_bassa, q}
   foto: new Map(), // canale -> objectURL
   registro: null,
-  abbinato: null, // codice appena abbinato dal QR (per copiarlo nell'app su iPhone)
 };
 
 let config = null;
@@ -304,7 +303,6 @@ function htmlDashboard() {
   const sensori = [...stato.sensori.values()];
   const di = (g) => sensori.filter((s) => s.g.includes(g));
   return [
-    stato.abbinato ? htmlAppenaAbbinato() : "",
     htmlAllarme(),
     htmlRiepilogo(sensori, di("porte"), di("temperatura")),
     htmlAvvisi(sensori),
@@ -317,21 +315,6 @@ function htmlDashboard() {
     htmlVacanza(),
     `<div class="piede"><button data-azione="copia">Copia codice di abbinamento</button><button data-azione="dimentica">Dimentica questo telefono</button></div>`,
   ].join("");
-}
-
-function htmlAppenaAbbinato() {
-  return `
-    <section class="scheda abbina">
-      <h2>Telefono abbinato</h2>
-      <ol>
-        <li>Aggiungi questa pagina alla schermata Home: su iPhone Condividi → <b>Aggiungi alla schermata Home</b>, su Android menu ⋮ → <b>Installa app</b>.</li>
-        <li>Solo iPhone: premi <b>Copia codice</b>, apri Casa dalla schermata Home e premi <b>Incolla</b> e poi <b>Abbina</b>.</li>
-      </ol>
-      <div class="azioni">
-        <button data-azione="copia" class="bottone secondario">Copia codice</button>
-        <button data-azione="fatto" class="bottone primario">Fatto</button>
-      </div>
-    </section>`;
 }
 
 function htmlAllarme() {
@@ -758,11 +741,8 @@ async function esegui(azione, el) {
       return location.reload();
     case "copia":
       // ricavato dall'abbinamento salvato: serve per passarlo da Safari all'app sulla Home
-      await navigator.clipboard.writeText(stato.abbinato || codiceDa(config));
+      await navigator.clipboard.writeText(codiceDa(config));
       return mostra("Codice copiato");
-    case "fatto":
-      stato.abbinato = null;
-      return disegna();
     case "incolla":
       $("codice").value = await navigator.clipboard.readText();
       return;
@@ -842,7 +822,7 @@ document.addEventListener("visibilitychange", () => {
 if (location.hash.startsWith("#c=")) {
   try {
     abbina(location.hash);
-    stato.abbinato = location.hash.slice(3);
+    mostra("Telefono abbinato");
   } catch {
     mostra("Codice di abbinamento non valido", true);
   }
