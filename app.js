@@ -7,21 +7,21 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=3af35656";
-import { icona } from "./icone.js?v=3af35656";
-import { quandoRidisegnare, stato } from "./stato.js?v=3af35656";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=3af35656";
-import * as abbinamento from "./sezioni/abbinamento.js?v=3af35656";
-import * as accessi from "./sezioni/accessi.js?v=3af35656";
-import * as allarme from "./sezioni/allarme.js?v=3af35656";
-import * as batterie from "./sezioni/batterie.js?v=3af35656";
-import * as camere from "./sezioni/camere.js?v=3af35656";
-import * as luci from "./sezioni/luci.js?v=3af35656";
-import * as registro from "./sezioni/registro.js?v=3af35656";
-import * as riepilogo from "./sezioni/riepilogo.js?v=3af35656";
-import * as sensori from "./sezioni/sensori.js?v=3af35656";
-import * as sirene from "./sezioni/sirene.js?v=3af35656";
-import * as vacanza from "./sezioni/vacanza.js?v=3af35656";
+import * as collegamento from "./collegamento.js?v=0e880f61";
+import { icona } from "./icone.js?v=0e880f61";
+import { quandoRidisegnare, stato } from "./stato.js?v=0e880f61";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=0e880f61";
+import * as abbinamento from "./sezioni/abbinamento.js?v=0e880f61";
+import * as accessi from "./sezioni/accessi.js?v=0e880f61";
+import * as allarme from "./sezioni/allarme.js?v=0e880f61";
+import * as batterie from "./sezioni/batterie.js?v=0e880f61";
+import * as camere from "./sezioni/camere.js?v=0e880f61";
+import * as luci from "./sezioni/luci.js?v=0e880f61";
+import * as registro from "./sezioni/registro.js?v=0e880f61";
+import * as riepilogo from "./sezioni/riepilogo.js?v=0e880f61";
+import * as sensori from "./sezioni/sensori.js?v=0e880f61";
+import * as sirene from "./sezioni/sirene.js?v=0e880f61";
+import * as vacanza from "./sezioni/vacanza.js?v=0e880f61";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -160,17 +160,25 @@ document.addEventListener("visibilitychange", () => {
 
 // ---------- avvio ----------
 
+collegamento.leggiAbbinamento();
 if (location.hash.startsWith("#c=")) {
-  // aperta dal QR di abbinamento
+  // aperta dal QR di abbinamento. Un telefono già abbinato non cambia abbinamento da un link
+  // (chi ne manda uno potrebbe collegare la dashboard a un broker suo, che mostra stati
+  // finti): prima si fa "Dimentica questo telefono", in fondo alla dashboard.
   try {
-    collegamento.abbina(location.hash);
-    mostra("Telefono abbinato");
+    if (!collegamento.abbinato()) {
+      collegamento.abbina(location.hash);
+      mostra("Telefono abbinato");
+    } else if (collegamento.stessoAbbinamento(location.hash)) {
+      mostra("Telefono già abbinato");
+    } else {
+      mostra("Telefono già abbinato: per cambiare abbinamento, prima «Dimentica questo telefono» in fondo", true);
+    }
   } catch {
     mostra("Codice di abbinamento non valido", true);
   }
   history.replaceState(null, "", location.pathname + location.search); // il codice esce dalla barra
 }
-if (!collegamento.abbinato()) collegamento.leggiAbbinamento();
 quandoRidisegnare(disegna);
 disegnaData();
 setInterval(disegnaData, 60000);

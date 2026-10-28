@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=3af35656";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=3af35656";
-import { stato } from "./stato.js?v=3af35656";
+import { Mqtt } from "./mqtt.js?v=0e880f61";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=0e880f61";
+import { stato } from "./stato.js?v=0e880f61";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
@@ -39,8 +39,8 @@ export function leggiAbbinamento() {
   return abbinamento;
 }
 
-// dal QR (link con #c=...) o dal codice incollato; eccezione se non è valido
-export function abbina(testo) {
+// il codice di abbinamento (link del QR con #c=... o codice incollato) letto; eccezione se non è valido
+function leggiCodice(testo) {
   let t = testo.trim();
   const m = t.match(/#c=([A-Za-z0-9_-]+)/);
   if (m) t = m[1];
@@ -48,6 +48,20 @@ export function abbina(testo) {
   t += "=".repeat((4 - (t.length % 4)) % 4);
   const c = JSON.parse(atob(t));
   if (!c.h || !c.u || !c.p || !c.k) throw new Error("codice incompleto");
+  return c;
+}
+
+// true se il codice è quello con cui il telefono è già abbinato
+export function stessoAbbinamento(testo) {
+  const c = leggiCodice(testo);
+  return ["h", "u", "p", "k", "t"].every((x) => (c[x] || "") === (abbinamento[x] || ""));
+}
+
+// abbina il telefono, solo se non lo è già: per cambiare abbinamento si passa da "Dimentica
+// questo telefono". Eccezione se il codice non è valido.
+export function abbina(testo) {
+  if (abbinamento) throw new Error("telefono già abbinato");
+  const c = leggiCodice(testo);
   localStorage.setItem(ARCHIVIO, JSON.stringify(c));
   abbinamento = c;
   chiediPersistenza();
