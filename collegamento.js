@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=e7c25cc5";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=e7c25cc5";
-import { stato } from "./stato.js?v=e7c25cc5";
+import { Mqtt } from "./mqtt.js?v=1e91316d";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=1e91316d";
+import { stato } from "./stato.js?v=1e91316d";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const PORTA_WS = 8084;
