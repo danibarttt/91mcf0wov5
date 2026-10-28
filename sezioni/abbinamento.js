@@ -1,8 +1,8 @@
 // Abbinamento del telefono: la schermata per incollare il codice (iPhone, app sulla Home) e,
 // in fondo alla dashboard, "Copia codice di abbinamento" e "Dimentica questo telefono".
 
-import { abbina, codiceAbbinamento, dimentica } from "../collegamento.js?v=88c049d4";
-import { $, conferma, mostra } from "../utili.js?v=88c049d4";
+import { abbina, codiceAbbinamento, dimentica } from "../collegamento.js?v=91c42921";
+import { $, conferma, mostra } from "../utili.js?v=91c42921";
 
 export function schermata() {
   return `

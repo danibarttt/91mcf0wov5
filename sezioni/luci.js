@@ -2,10 +2,10 @@
 // casa", e il pannello con interruttore e cursori di luminosità, bianco e colore
 // (<dialog id="luce"> in index.html).
 
-import { comando } from "../collegamento.js?v=88c049d4";
-import { icona } from "../icone.js?v=88c049d4";
-import { stato } from "../stato.js?v=88c049d4";
-import { $, esc, maiuscola, mostra, sezione } from "../utili.js?v=88c049d4";
+import { comando } from "../collegamento.js?v=91c42921";
+import { icona } from "../icone.js?v=91c42921";
+import { stato } from "../stato.js?v=91c42921";
+import { $, esc, maiuscola, mostra, sezione } from "../utili.js?v=91c42921";
 
 const CURSORE_OGNI_MS = 250; // mentre si trascina un cursore, al massimo un comando ogni tanto
 
@@ -76,20 +76,68 @@ export const azioni = {
 };
 
 // ---------- pannello di una luce ----------
+//
+// Lo stato di una luce arriva in ritardo (la transizione, il cervello, il broker in cloud):
+// lasciato un cursore, arrivano ancora gli stati dei comandi partiti mentre lo si trascinava.
+// Per questo il pannello mostra i valori scelti qui ("scelti") finché la luce non li conferma.
+
+const TIENI_MS = 1500; // dopo l'ultima risposta del cervello, i valori scelti restano comunque
+const MASSIMO_MS = 6000; // dall'ultimo tocco: poi vince lo stato della luce, confermato o no
 
 let aperta = null; // id della luce nel pannello
-let trascinando = false; // finché si trascina, i cursori non seguono lo stato che arriva
+let scelti = {}; // campo ("acceso", "lum", "k", "h", "modo") -> valore scelto nel pannello
+let ultimaScelta = 0;
+let inAttesa = 0; // comandi partiti senza risposta
+let ultimaRisposta = 0;
+let rilettura = null;
 
 function apriPannello(id) {
   aperta = id;
-  aggiornaPannello(true);
+  scelti = {};
+  aggiornaPannello();
   $("luce").showModal();
 }
 
+// la luce riporta valori arrotondati (Matter usa 254 passi e i mireds)
+function confermato(campo, vero, voluto) {
+  if (vero == null) return false;
+  if (campo === "lum") return Math.abs(vero - voluto) <= 1;
+  if (campo === "k") return Math.abs(vero - voluto) <= 60;
+  if (campo === "h") return Math.abs(((vero - voluto + 540) % 360) - 180) <= 2;
+  return vero === voluto;
+}
+
+// la luce come va mostrata: lo stato arrivato, con sopra i valori scelti non ancora confermati
+function mostrata(l) {
+  const ora = Date.now();
+  if (ora > ultimaScelta + MASSIMO_MS) scelti = {};
+  else if (!inAttesa && ora > ultimaRisposta + TIENI_MS) {
+    for (const c of Object.keys(scelti)) if (confermato(c, l[c], scelti[c])) delete scelti[c];
+  }
+  return { ...l, ...scelti };
+}
+
+// ridisegna quando i valori scelti smettono di contare, anche se non arriva niente
+function rileggiPiuTardi() {
+  clearTimeout(rilettura);
+  if (!Object.keys(scelti).length) return;
+  // alla fine di TIENI_MS si guarda se la luce ha confermato; poi conta solo MASSIMO_MS
+  // (ogni stato nuovo ridisegna già da sé, vedi app.js)
+  const ora = Date.now();
+  const fineTieni = ultimaRisposta + TIENI_MS;
+  const quando = !inAttesa && ora < fineTieni ? fineTieni : ultimaScelta + MASSIMO_MS;
+  rilettura = setTimeout(aggiornaPannello, Math.max(0, quando - ora) + 50);
+}
+
+function imposta(input, valore) {
+  if (input.value !== String(valore)) input.value = valore; // mai sotto il dito, se non cambia
+}
+
 // a ogni aggiornamento delle luci (vedi app.js)
-export function aggiornaPannello(forza = false) {
-  const l = aperta && stato.luci.find((x) => x.id === aperta);
-  if (!l) return;
+export function aggiornaPannello() {
+  const vera = aperta && stato.luci.find((x) => x.id === aperta);
+  if (!vera) return;
+  const l = mostrata(vera);
   const c = colore(l);
   $("luce-nome").textContent = nome(l);
   $("luce-stato").textContent = descrizione(l);
@@ -99,23 +147,44 @@ export function aggiornaPannello(forza = false) {
   ic.style.setProperty("--colore", c);
   $("luce").classList.toggle("spenta", !l.acceso);
   $("luce-lum").style.setProperty("--colore", c);
-  if (trascinando && !forza) return; // non spostare il cursore sotto il dito
   $("luce-accesa").checked = Boolean(l.acceso);
-  $("luce-lum").value = l.lum ?? 100;
+  imposta($("luce-lum"), l.lum ?? 100);
   $("luce-k").min = l.kmin ?? 2500;
   $("luce-k").max = l.kmax ?? 6500;
-  $("luce-k").value = l.k ?? 2700;
-  $("luce-h").value = l.h ?? 30;
+  imposta($("luce-k"), l.k ?? 2700);
+  imposta($("luce-h"), l.h ?? 30);
   // il cursore del modo attuale (bianco o colore) è pieno, l'altro sbiadito
   $("luce-k").closest(".cursore").classList.toggle("sbiadito", l.modo === "colore");
   $("luce-h").closest(".cursore").classList.toggle("sbiadito", l.modo !== "colore");
   etichetteCursori();
+  rileggiPiuTardi();
 }
 
 function etichetteCursori() {
   $("luce-lum-v").textContent = `${$("luce-lum").value}%`;
   $("luce-k-v").textContent = `${$("luce-k").value} K`;
   $("luce-h-v").textContent = `${$("luce-h").value}°`;
+}
+
+// un valore scelto nel pannello: si mostra subito e si manda alla luce
+function scegli(campi) {
+  scelti = { ...scelti, ...campi };
+  ultimaScelta = Date.now();
+  aggiornaPannello();
+}
+
+function manda(luce, dati) {
+  inAttesa++;
+  comando("luce", { luce, ...dati })
+    .catch((e) => {
+      scelti = {}; // non è andato: si torna a mostrare la luce com'è
+      mostra(e.message, true);
+    })
+    .finally(() => {
+      inAttesa--;
+      ultimaRisposta = Date.now();
+      aggiornaPannello();
+    });
 }
 
 // mentre si trascina: al massimo un comando ogni CURSORE_OGNI_MS, con gli ultimi valori
@@ -128,33 +197,39 @@ function invia(campi) {
     const luce = aperta, dati = inSospeso;
     inSospeso = null;
     timer = null;
-    if (luce && dati) comando("luce", { luce, ...dati }).catch((e) => mostra(e.message, true));
+    if (luce && dati) manda(luce, dati);
   }, CURSORE_OGNI_MS);
 }
 
 function cursore(input, campo) {
-  const inizio = () => (trascinando = true);
-  input.addEventListener("pointerdown", inizio);
-  input.addEventListener("touchstart", inizio, { passive: true });
   input.addEventListener("input", () => {
-    etichetteCursori();
     const v = Number(input.value);
-    // scegliere un bianco o un colore porta la luce in quel modo
-    if (campo === "k") invia({ k: v, h: undefined });
-    else if (campo === "h") invia({ h: v, k: undefined });
-    else invia({ lum: v });
+    // un cursore accende la luce; scegliere un bianco o un colore la porta in quel modo
+    if (campo === "k") {
+      delete scelti.h;
+      scegli({ acceso: true, k: v, modo: "bianco" });
+      invia({ k: v, h: undefined });
+    } else if (campo === "h") {
+      delete scelti.k;
+      scegli({ acceso: true, h: v, modo: "colore" });
+      invia({ h: v, k: undefined });
+    } else {
+      scegli({ acceso: true, lum: v });
+      invia({ lum: v });
+    }
   });
-  input.addEventListener("change", () => setTimeout(() => (trascinando = false), CURSORE_OGNI_MS * 2));
 }
 
 cursore($("luce-lum"), "lum");
 cursore($("luce-k"), "k");
 cursore($("luce-h"), "h");
 $("luce-accesa").addEventListener("change", (e) => {
-  comando("luce", { luce: aperta, accesa: e.target.checked }).catch((err) => mostra(err.message, true));
+  scegli({ acceso: e.target.checked });
+  manda(aperta, { accesa: e.target.checked });
 });
 $("luce-chiudi").addEventListener("click", () => $("luce").close());
 $("luce").addEventListener("close", () => {
   aperta = null;
-  trascinando = false;
+  scelti = {};
+  clearTimeout(rilettura);
 });
