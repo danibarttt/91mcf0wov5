@@ -7,21 +7,21 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=0e880f61";
-import { icona } from "./icone.js?v=0e880f61";
-import { quandoRidisegnare, stato } from "./stato.js?v=0e880f61";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=0e880f61";
-import * as abbinamento from "./sezioni/abbinamento.js?v=0e880f61";
-import * as accessi from "./sezioni/accessi.js?v=0e880f61";
-import * as allarme from "./sezioni/allarme.js?v=0e880f61";
-import * as batterie from "./sezioni/batterie.js?v=0e880f61";
-import * as camere from "./sezioni/camere.js?v=0e880f61";
-import * as luci from "./sezioni/luci.js?v=0e880f61";
-import * as registro from "./sezioni/registro.js?v=0e880f61";
-import * as riepilogo from "./sezioni/riepilogo.js?v=0e880f61";
-import * as sensori from "./sezioni/sensori.js?v=0e880f61";
-import * as sirene from "./sezioni/sirene.js?v=0e880f61";
-import * as vacanza from "./sezioni/vacanza.js?v=0e880f61";
+import * as collegamento from "./collegamento.js?v=00fc998d";
+import { icona } from "./icone.js?v=00fc998d";
+import { quandoRidisegnare, stato } from "./stato.js?v=00fc998d";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=00fc998d";
+import * as abbinamento from "./sezioni/abbinamento.js?v=00fc998d";
+import * as accessi from "./sezioni/accessi.js?v=00fc998d";
+import * as allarme from "./sezioni/allarme.js?v=00fc998d";
+import * as batterie from "./sezioni/batterie.js?v=00fc998d";
+import * as camere from "./sezioni/camere.js?v=00fc998d";
+import * as luci from "./sezioni/luci.js?v=00fc998d";
+import * as registro from "./sezioni/registro.js?v=00fc998d";
+import * as riepilogo from "./sezioni/riepilogo.js?v=00fc998d";
+import * as sensori from "./sezioni/sensori.js?v=00fc998d";
+import * as sirene from "./sezioni/sirene.js?v=00fc998d";
+import * as vacanza from "./sezioni/vacanza.js?v=00fc998d";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -56,6 +56,9 @@ function disegna() {
   requestAnimationFrame(() => {
     disegnoInAttesa = false;
     const app = $("app");
+    // una sezione aperta o chiusa da un tocco appena prima: l'evento "toggle" arriva dopo il
+    // ridisegno, su un elemento ormai tolto, e andrebbe perso
+    for (const d of app.querySelectorAll("details[data-sezione]")) sezioneAperta(d.dataset.sezione, d.open);
     // finché non arriva lo stato dell'allarme: schermata di caricamento, poi dissolvenza
     const inAttesaDiCasa = collegamento.abbinato() && !stato.allarme;
     app.innerHTML = !collegamento.abbinato() ? abbinamento.schermata() : inAttesaDiCasa ? htmlCaricamento() : htmlDashboard();
@@ -139,15 +142,21 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// ricorda quali sezioni a scomparsa sono aperte ("toggle" non risale: si ascolta in cattura)
+// ricorda quali sezioni a scomparsa sono aperte; registro e accessi si chiedono al cervello
+// quando si aprono
+function sezioneAperta(id, aperta) {
+  if (aperta === sezioniAperte.has(id)) return;
+  aperta ? sezioniAperte.add(id) : sezioniAperte.delete(id);
+  if (id === "registro" && aperta) registro.aperta().catch((err) => mostra(err.message, true));
+  if (id === "accessi" && aperta) accessi.aperta().catch((err) => mostra(err.message, true));
+}
+
+// "toggle" non risale: si ascolta in cattura
 document.addEventListener(
   "toggle",
   (e) => {
     const id = e.target.dataset?.sezione;
-    if (!id) return;
-    e.target.open ? sezioniAperte.add(id) : sezioniAperte.delete(id);
-    if (id === "registro" && e.target.open) registro.aperta().catch((err) => mostra(err.message, true));
-    if (id === "accessi" && e.target.open) accessi.aperta().catch((err) => mostra(err.message, true));
+    if (id) sezioneAperta(id, e.target.open);
   },
   true,
 );

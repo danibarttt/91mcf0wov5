@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=0e880f61";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=0e880f61";
-import { stato } from "./stato.js?v=0e880f61";
+import { Mqtt } from "./mqtt.js?v=00fc998d";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=00fc998d";
+import { stato } from "./stato.js?v=00fc998d";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
