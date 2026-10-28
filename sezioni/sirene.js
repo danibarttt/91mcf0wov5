@@ -1,9 +1,9 @@
 // Sirene: volume e suoneria giusti (li controlla il cervello, vedi cervello/casa/volumi.py)
 // e l'accesso alle simulazioni, che si aprono solo dalla rete di casa.
 
-import { comando } from "../collegamento.js?v=1e7bbf3b";
-import { stato } from "../stato.js?v=1e7bbf3b";
-import { apribile, colpoDOcchio, conferma, esc, mostra, ora, pillola, sezione } from "../utili.js?v=1e7bbf3b";
+import { comando } from "../collegamento.js?v=1c1a257f";
+import { stato } from "../stato.js?v=1c1a257f";
+import { apribile, colpoDOcchio, conferma, esc, mostra, ora, pillola, sezione } from "../utili.js?v=1c1a257f";
 
 export function html() {
   const s = stato.sirene;
@@ -58,10 +58,12 @@ export const azioni = {
     location.assign(url);
   },
   // il certificato della CA delle simulazioni (vale solo per la loro pagina), nei Download:
-  // Android non permette di installarlo da qui, va fatto dalle Impostazioni
+  // Android non permette di installarlo da qui, va fatto dalle Impostazioni. Tipo generico:
+  // con "application/x-x509-ca-cert" Chrome su Android non salva il file, lo passa
+  // all'installatore di sistema, che da Android 11 lo rifiuta (e il file sparisce)
   async scarica_certificato() {
     const { pem } = await comando("certificato_simulazioni");
-    const url = URL.createObjectURL(new Blob([pem], { type: "application/x-x509-ca-cert" }));
+    const url = URL.createObjectURL(new Blob([pem], { type: "application/octet-stream" }));
     const a = document.createElement("a");
     a.href = url;
     a.download = "casa-simulazioni.crt";
