@@ -16,6 +16,7 @@ export const stato = {
   sensori: new Map(), // id -> {n, g: [gruppi], aperto, fumo, acqua, temp, batt, batt_bassa, q}
   foto: new Map(), // canale -> URL dell'ultima foto
   registro: null, // [[quando, tipo, fonte, testo]], caricato all'apertura della sezione
+  accessi: null, // [{dal, al, d, desc, ip, luogo}], caricato all'apertura della sezione
 };
 
 // sensori di una sezione: "porte", "fumo", "acqua", "temperatura" ("altri": bottone e sirene)

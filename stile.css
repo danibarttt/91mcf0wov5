@@ -291,6 +291,12 @@ button:disabled { opacity: 0.55; cursor: default; }
 .registro .cosa { font-size: 15px; }
 
 .vuoto { color: var(--tenue); margin: 0; }
+
+/* ---------- accessi ---------- */
+.registro li.sconosciuto .cosa { color: var(--pericolo); font-weight: 600; }
+.registro li.sconosciuto .punto { color: var(--pericolo); }
+.fonte { color: var(--tenue); font-size: 12px; margin: 0; padding: 4px 16px 10px; }
+.fonte a { color: inherit; }
 .piede { text-align: center; margin-top: 34px; display: flex; gap: 6px 18px; justify-content: center; flex-wrap: wrap; }
 .piede button { background: none; border: 0; color: var(--tenue); text-decoration: underline; cursor: pointer; font-size: 14px; }
 

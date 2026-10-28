@@ -1,11 +1,12 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=34cf9561";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=34cf9561";
-import { stato } from "./stato.js?v=34cf9561";
+import { Mqtt } from "./mqtt.js?v=9390fbe6";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=9390fbe6";
+import { stato } from "./stato.js?v=9390fbe6";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
+const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
 const PORTA_WS = 8084;
 const ATTESA_RISPOSTA_MS = 20000;
 
@@ -87,9 +88,26 @@ export async function collega(quandoArriva) {
       stato.collegamento = s;
       stato.motivo = motivo || "";
       alMessaggio("collegamento");
+      if (s === "collegato") presentati();
     },
   });
   client.apri();
+}
+
+// a ogni collegamento la pagina dice al cervello chi è (cervello/casa/dashboard/accessi.py)
+function presentati() {
+  const app = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  comando("ciao", { d: idDispositivo(), cid: client.clientId, ua: navigator.userAgent, app }).catch(() => {});
+}
+
+function idDispositivo() {
+  try {
+    let id = localStorage.getItem(DISPOSITIVO);
+    if (!id) localStorage.setItem(DISPOSITIVO, (id = casuale(8)));
+    return id;
+  } catch {
+    return "senza-memoria";
+  }
 }
 
 // in secondo piano il sistema chiude la connessione: al ritorno si riapre subito

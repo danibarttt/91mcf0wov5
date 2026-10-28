@@ -7,20 +7,21 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=34cf9561";
-import { icona } from "./icone.js?v=34cf9561";
-import { quandoRidisegnare, stato } from "./stato.js?v=34cf9561";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=34cf9561";
-import * as abbinamento from "./sezioni/abbinamento.js?v=34cf9561";
-import * as allarme from "./sezioni/allarme.js?v=34cf9561";
-import * as batterie from "./sezioni/batterie.js?v=34cf9561";
-import * as camere from "./sezioni/camere.js?v=34cf9561";
-import * as luci from "./sezioni/luci.js?v=34cf9561";
-import * as registro from "./sezioni/registro.js?v=34cf9561";
-import * as riepilogo from "./sezioni/riepilogo.js?v=34cf9561";
-import * as sensori from "./sezioni/sensori.js?v=34cf9561";
-import * as sirene from "./sezioni/sirene.js?v=34cf9561";
-import * as vacanza from "./sezioni/vacanza.js?v=34cf9561";
+import * as collegamento from "./collegamento.js?v=9390fbe6";
+import { icona } from "./icone.js?v=9390fbe6";
+import { quandoRidisegnare, stato } from "./stato.js?v=9390fbe6";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=9390fbe6";
+import * as abbinamento from "./sezioni/abbinamento.js?v=9390fbe6";
+import * as accessi from "./sezioni/accessi.js?v=9390fbe6";
+import * as allarme from "./sezioni/allarme.js?v=9390fbe6";
+import * as batterie from "./sezioni/batterie.js?v=9390fbe6";
+import * as camere from "./sezioni/camere.js?v=9390fbe6";
+import * as luci from "./sezioni/luci.js?v=9390fbe6";
+import * as registro from "./sezioni/registro.js?v=9390fbe6";
+import * as riepilogo from "./sezioni/riepilogo.js?v=9390fbe6";
+import * as sensori from "./sezioni/sensori.js?v=9390fbe6";
+import * as sirene from "./sezioni/sirene.js?v=9390fbe6";
+import * as vacanza from "./sezioni/vacanza.js?v=9390fbe6";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -35,13 +36,14 @@ function htmlDashboard() {
     batterie.html(),
     sirene.html(),
     registro.html(),
+    accessi.html(),
     vacanza.html(),
     sirene.simulazioni(),
     abbinamento.piede(),
   ].join("");
 }
 
-const azioni = { ...abbinamento.azioni, ...allarme.azioni, ...camere.azioni, ...luci.azioni, ...registro.azioni, ...riepilogo.azioni, ...sirene.azioni };
+const azioni = { ...abbinamento.azioni, ...accessi.azioni, ...allarme.azioni, ...camere.azioni, ...luci.azioni, ...registro.azioni, ...riepilogo.azioni, ...sirene.azioni };
 const cambi = { ...vacanza.cambi };
 
 // ---------- disegno ----------
@@ -145,6 +147,7 @@ document.addEventListener(
     if (!id) return;
     e.target.open ? sezioniAperte.add(id) : sezioniAperte.delete(id);
     if (id === "registro" && e.target.open) registro.aperta().catch((err) => mostra(err.message, true));
+    if (id === "accessi" && e.target.open) accessi.aperta().catch((err) => mostra(err.message, true));
   },
   true,
 );
