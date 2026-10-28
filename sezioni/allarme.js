@@ -1,9 +1,9 @@
 // La scheda dell'allarme in cima: spento (grigio), acceso (rosso), scattato; Accendi/Spegni.
 
-import { comando } from "../collegamento.js?v=80d1de4c";
-import { icona } from "../icone.js?v=80d1de4c";
-import { stato } from "../stato.js?v=80d1de4c";
-import { conferma, esc, mostra, ora } from "../utili.js?v=80d1de4c";
+import { comando } from "../collegamento.js?v=1e7bbf3b";
+import { icona } from "../icone.js?v=1e7bbf3b";
+import { stato } from "../stato.js?v=1e7bbf3b";
+import { conferma, esc, mostra, ora } from "../utili.js?v=1e7bbf3b";
 
 const TITOLI = { spento: "Spento", acceso: "Acceso", scattato: "Scattato!" };
 const SIMBOLI = { spento: "scudo", acceso: "scudoOk", scattato: "scudoAllarme" };

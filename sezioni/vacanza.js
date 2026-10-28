@@ -1,10 +1,10 @@
 // Modalità vacanza: l'allarme non si accende e non si spegne più da solo agli orari.
 // Interruttore con conferma.
 
-import { comando } from "../collegamento.js?v=80d1de4c";
-import { icona } from "../icone.js?v=80d1de4c";
-import { stato } from "../stato.js?v=80d1de4c";
-import { conferma, esc, mostra, sezione } from "../utili.js?v=80d1de4c";
+import { comando } from "../collegamento.js?v=1e7bbf3b";
+import { icona } from "../icone.js?v=1e7bbf3b";
+import { stato } from "../stato.js?v=1e7bbf3b";
+import { conferma, esc, mostra, sezione } from "../utili.js?v=1e7bbf3b";
 
 export function html() {
   const a = stato.allarme;

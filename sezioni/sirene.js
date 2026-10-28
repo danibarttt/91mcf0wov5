@@ -1,9 +1,9 @@
 // Sirene: volume e suoneria giusti (li controlla il cervello, vedi cervello/casa/volumi.py)
 // e l'accesso alle simulazioni, che si aprono solo dalla rete di casa.
 
-import { comando } from "../collegamento.js?v=80d1de4c";
-import { stato } from "../stato.js?v=80d1de4c";
-import { apribile, colpoDOcchio, conferma, esc, mostra, ora, pillola, sezione } from "../utili.js?v=80d1de4c";
+import { comando } from "../collegamento.js?v=1e7bbf3b";
+import { stato } from "../stato.js?v=1e7bbf3b";
+import { apribile, colpoDOcchio, conferma, esc, mostra, ora, pillola, sezione } from "../utili.js?v=1e7bbf3b";
 
 export function html() {
   const s = stato.sirene;
@@ -33,7 +33,11 @@ export function simulazioni() {
   return sezione(
     "Simulazioni",
     `<div class="scheda"><p class="vuoto">Prove dal vero degli scenari, con le sirene al minimo. La pagina è in casa: si apre solo col telefono sul Wi-Fi di casa.</p>
-    <div class="azioni registro-azioni"><button data-azione="apri_simulazioni" class="bottone secondario">Apri le simulazioni</button></div></div>`,
+    <p class="vuoto">La prima volta su un dispositivo serve il certificato: scaricalo e installalo da Impostazioni → Sicurezza e privacy → Altre impostazioni di sicurezza → Installa un certificato → Certificato CA.</p>
+    <div class="azioni registro-azioni">
+      <button data-azione="scarica_certificato" class="bottone secondario">Scarica certificato</button>
+      <button data-azione="apri_simulazioni" class="bottone secondario">Apri le simulazioni</button>
+    </div></div>`,
   );
 }
 
@@ -52,5 +56,19 @@ export const azioni = {
   async apri_simulazioni() {
     const { url } = await comando("simulazioni");
     location.assign(url);
+  },
+  // il certificato della CA delle simulazioni (vale solo per la loro pagina), nei Download:
+  // Android non permette di installarlo da qui, va fatto dalle Impostazioni
+  async scarica_certificato() {
+    const { pem } = await comando("certificato_simulazioni");
+    const url = URL.createObjectURL(new Blob([pem], { type: "application/x-x509-ca-cert" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "casa-simulazioni.crt";
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    mostra("Certificato scaricato: ora installalo dalle Impostazioni");
   },
 };
