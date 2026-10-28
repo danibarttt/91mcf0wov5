@@ -1,10 +1,10 @@
 // Le camere: un riquadro per camera con l'ultima foto, e il visore (<dialog id="visore"> in
 // index.html) con "Nuova foto" e la diretta (una foto al secondo).
 
-import { comando } from "../collegamento.js?v=1c1a257f";
-import { icona } from "../icone.js?v=1c1a257f";
-import { stato } from "../stato.js?v=1c1a257f";
-import { $, apribile, esc, mostra } from "../utili.js?v=1c1a257f";
+import { comando } from "../collegamento.js?v=02b5549e";
+import { icona } from "../icone.js?v=02b5549e";
+import { stato } from "../stato.js?v=02b5549e";
+import { $, apribile, esc, mostra } from "../utili.js?v=02b5549e";
 
 const DIRETTA_RINNOVO_MS = 30000; // il cervello la ferma dopo 60 s senza rinnovo
 const DIRETTA_MAX_MS = 5 * 60000; // e il telefono comunque dopo 5 minuti

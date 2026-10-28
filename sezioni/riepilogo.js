@@ -1,10 +1,10 @@
 // Sotto l'allarme: le pillole del riepilogo (aperti, luci, temperature, vacanza, pericolo) e
 // la scheda degli avvisi (fumo, acqua, batterie scariche) con "Zittisci sirene".
 
-import { comando } from "../collegamento.js?v=1c1a257f";
-import { icona } from "../icone.js?v=1c1a257f";
-import { sensoriDi, stato } from "../stato.js?v=1c1a257f";
-import { esc, etichetta, gradi, mostra, pillola } from "../utili.js?v=1c1a257f";
+import { comando } from "../collegamento.js?v=02b5549e";
+import { icona } from "../icone.js?v=02b5549e";
+import { sensoriDi, stato } from "../stato.js?v=02b5549e";
+import { esc, etichetta, gradi, mostra, pillola } from "../utili.js?v=02b5549e";
 
 const BATTERIA_SCARICA = 15; // %
 

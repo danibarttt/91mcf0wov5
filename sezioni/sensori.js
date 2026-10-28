@@ -2,9 +2,9 @@
 // finestre, Fumo e acqua, Temperature. Quali sensori stanno in quale sezione lo decidono le
 // liste di config.toml.
 
-import { icona } from "../icone.js?v=1c1a257f";
-import { sensoriDi } from "../stato.js?v=1c1a257f";
-import { apribile, colpoDOcchio, esc, etichetta, gradi, maiuscola, ora, pillola } from "../utili.js?v=1c1a257f";
+import { icona } from "../icone.js?v=02b5549e";
+import { sensoriDi } from "../stato.js?v=02b5549e";
+import { apribile, colpoDOcchio, esc, etichetta, gradi, maiuscola, ora, pillola } from "../utili.js?v=02b5549e";
 
 const SOGLIA_CALDO = 50; // °C, come soglia_temperatura in config.toml
 
