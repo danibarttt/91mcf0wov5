@@ -7,19 +7,19 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=02b5549e";
-import { icona } from "./icone.js?v=02b5549e";
-import { quandoRidisegnare, stato } from "./stato.js?v=02b5549e";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=02b5549e";
-import * as abbinamento from "./sezioni/abbinamento.js?v=02b5549e";
-import * as allarme from "./sezioni/allarme.js?v=02b5549e";
-import * as camere from "./sezioni/camere.js?v=02b5549e";
-import * as luci from "./sezioni/luci.js?v=02b5549e";
-import * as registro from "./sezioni/registro.js?v=02b5549e";
-import * as riepilogo from "./sezioni/riepilogo.js?v=02b5549e";
-import * as sensori from "./sezioni/sensori.js?v=02b5549e";
-import * as sirene from "./sezioni/sirene.js?v=02b5549e";
-import * as vacanza from "./sezioni/vacanza.js?v=02b5549e";
+import * as collegamento from "./collegamento.js?v=fa52ac68";
+import { icona } from "./icone.js?v=fa52ac68";
+import { quandoRidisegnare, stato } from "./stato.js?v=fa52ac68";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=fa52ac68";
+import * as abbinamento from "./sezioni/abbinamento.js?v=fa52ac68";
+import * as allarme from "./sezioni/allarme.js?v=fa52ac68";
+import * as camere from "./sezioni/camere.js?v=fa52ac68";
+import * as luci from "./sezioni/luci.js?v=fa52ac68";
+import * as registro from "./sezioni/registro.js?v=fa52ac68";
+import * as riepilogo from "./sezioni/riepilogo.js?v=fa52ac68";
+import * as sensori from "./sezioni/sensori.js?v=fa52ac68";
+import * as sirene from "./sezioni/sirene.js?v=fa52ac68";
+import * as vacanza from "./sezioni/vacanza.js?v=fa52ac68";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {

@@ -18,6 +18,7 @@ const tracciati = {
   orologio: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7.5V12l3 2",
   ok: "M5 12.5l4.5 4.5L19 7.5",
   attenzione: "M12 4l9 16H3l9-16zM12 10v4.5M12 17.5h.01",
+  sirena: "M11 5L6.5 9H3v6h3.5l4.5 4V5zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13",
   muto: "M11 5L6.5 9H3v6h3.5l4.5 4V5zM16 9.5l5 5M21 9.5l-5 5",
   chiudi: "M6 6l12 12M18 6L6 18",
   persona: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 21a7.5 7.5 0 0 1 15 0",

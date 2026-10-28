@@ -1,10 +1,11 @@
-// Sotto l'allarme: le pillole del riepilogo (aperti, luci, temperature, vacanza, pericolo) e
-// la scheda degli avvisi (fumo, acqua, batterie scariche) con "Zittisci sirene".
+// Sotto l'allarme: le pillole del riepilogo (sirene, aperti, luci, temperature, vacanza,
+// pericolo) e la scheda degli avvisi (sirene che suonano, fumo, acqua, batterie scariche) con
+// "Zittisci sirene".
 
-import { comando } from "../collegamento.js?v=02b5549e";
-import { icona } from "../icone.js?v=02b5549e";
-import { sensoriDi, stato } from "../stato.js?v=02b5549e";
-import { esc, etichetta, gradi, mostra, pillola } from "../utili.js?v=02b5549e";
+import { comando } from "../collegamento.js?v=fa52ac68";
+import { icona } from "../icone.js?v=fa52ac68";
+import { sensoriDi, stato } from "../stato.js?v=fa52ac68";
+import { esc, etichetta, gradi, mostra, ora, pillola } from "../utili.js?v=fa52ac68";
 
 const BATTERIA_SCARICA = 15; // %
 
@@ -15,6 +16,7 @@ export function html() {
 function pillole() {
   const p = [];
   const sensori = [...stato.sensori.values()];
+  if (stato.suonano.length) p.push(pillola("Sirene in funzione", "sirena", "pericolo"));
   if (sensori.some((s) => s.fumo || s.acqua)) p.push(pillola("Pericolo", "attenzione", "pericolo"));
   if (stato.allarme.vacanza) p.push(pillola("In vacanza", "valigia", "vacanza"));
   if (stato.sirene?.prova) p.push(pillola("Sirene al minimo (simulazione)", "muto", "attenzione"));
@@ -37,15 +39,23 @@ function avvisi() {
   const sensori = [...stato.sensori.values()];
   const pericoli = sensori.filter((s) => s.fumo || s.acqua);
   const batterie = sensori.filter((s) => s.batt_bassa || (s.batt != null && s.batt <= BATTERIA_SCARICA));
-  if (!pericoli.length && !batterie.length) return "";
+  const suonano = stato.suonano;
+  if (!suonano.length && !pericoli.length && !batterie.length) return "";
   const righe = [
+    ...suonano.map((x) => `<li>${icona("sirena")}<span>Suona: ${esc(etichetta(x.n))}<span class="nota">${esc(comeFinisce(x))}</span></span></li>`),
     ...pericoli.map((s) => `<li>${icona(s.fumo ? "fiamma" : "goccia")}${s.fumo ? "Fumo" : "Acqua"}: ${esc(etichetta(s.n))}</li>`),
     ...batterie.map((s) => `<li>${icona("batteria")}Batteria scarica: ${esc(etichetta(s.n))}${s.batt != null ? ` (${s.batt}%)` : ""}</li>`),
   ];
-  const zittisci = pericoli.length
+  const zittisci = suonano.length || pericoli.length
     ? `<div class="azioni"><button data-azione="zittisci_sirene" class="bottone pericolo">${icona("muto")}Zittisci sirene</button></div>`
     : "";
-  return `<section class="scheda avvisi ${pericoli.length ? "grave" : ""}"><ul>${righe.join("")}</ul>${zittisci}</section>`;
+  return `<section class="scheda avvisi ${suonano.length || pericoli.length ? "grave" : ""}"><ul>${righe.join("")}</ul>${zittisci}</section>`;
+}
+
+// una sirena del Hub o Zigbee si ferma da sola a una certa ora; quelle delle camere no
+function comeFinisce(x) {
+  if (x.errore) return x.errore;
+  return x.fino ? `si ferma da sola ${ora(x.fino)}` : "finché non si spegne";
 }
 
 export const azioni = {

@@ -178,6 +178,7 @@ main.entra > *:nth-child(n + 4) { animation-delay: 0.12s; }
 .avvisi li .ic { color: var(--attenzione); }
 .avvisi.grave li .ic { color: var(--pericolo-testo); }
 .avvisi .azioni { margin-top: 10px; }
+.avvisi li .nota { display: block; color: var(--tenue); font-size: 13px; font-weight: 400; }
 
 /* ---------- bottoni ---------- */
 .bottone {

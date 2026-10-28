@@ -1,9 +1,9 @@
 // Sirene: volume e suoneria giusti (li controlla il cervello, vedi cervello/casa/volumi.py)
 // e l'accesso alle simulazioni, che si aprono solo dalla rete di casa.
 
-import { comando } from "../collegamento.js?v=02b5549e";
-import { stato } from "../stato.js?v=02b5549e";
-import { apribile, colpoDOcchio, conferma, esc, mostra, ora, pillola, sezione } from "../utili.js?v=02b5549e";
+import { comando } from "../collegamento.js?v=fa52ac68";
+import { stato } from "../stato.js?v=fa52ac68";
+import { apribile, colpoDOcchio, conferma, esc, mostra, ora, pillola, sezione } from "../utili.js?v=fa52ac68";
 
 export function html() {
   const s = stato.sirene;

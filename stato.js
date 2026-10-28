@@ -10,6 +10,7 @@ export const stato = {
   camere: [], // [{c, n}]
   luci: [], // [{id, n, acceso, lum, modo, k, h, kmin, kmax}]
   sirene: null, // {letto, prova, elenco: [{n, ok, d}]}
+  suonano: [], // le sirene che suonano adesso: [{n, fino?, errore?}]
   sensori: new Map(), // id -> {n, g: [gruppi], aperto, fumo, acqua, temp, batt, batt_bassa, q}
   foto: new Map(), // canale -> URL dell'ultima foto
   registro: null, // [[quando, tipo, fonte, testo]], caricato all'apertura della sezione
