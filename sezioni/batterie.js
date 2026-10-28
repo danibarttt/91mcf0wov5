@@ -2,10 +2,10 @@
 // la dicono quando si svegliano, e il cervello la rilegge con i volumi (ogni 12 ore): per non
 // consumarle non si chiede di più.
 
-import { icona } from "../icone.js?v=9390fbe6";
-import { stato } from "../stato.js?v=9390fbe6";
-import { apribile, colpoDOcchio, esc, etichetta, pillola } from "../utili.js?v=9390fbe6";
-import { iconaContatto } from "./sensori.js?v=9390fbe6";
+import { icona } from "../icone.js?v=3af35656";
+import { stato } from "../stato.js?v=3af35656";
+import { apribile, colpoDOcchio, esc, etichetta, pillola } from "../utili.js?v=3af35656";
+import { iconaContatto } from "./sensori.js?v=3af35656";
 
 export const SCARICA = 15; // %: da qui in giù è scarica (anche nel riepilogo)
 

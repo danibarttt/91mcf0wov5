@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=9390fbe6";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=9390fbe6";
-import { stato } from "./stato.js?v=9390fbe6";
+import { Mqtt } from "./mqtt.js?v=3af35656";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=3af35656";
+import { stato } from "./stato.js?v=3af35656";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
@@ -19,6 +19,7 @@ let client = null;
 let P = "casa"; // prefisso dei topic (le prove ne usano un altro)
 const inAttesa = new Map(); // id comando -> {resolve, reject, timer}
 let alMessaggio = () => {};
+let attesoCervello = false; // il primo messaggio `cervello` dopo il collegamento è quello salvato nel broker
 
 // ---------- abbinamento ----------
 
@@ -88,7 +89,10 @@ export async function collega(quandoArriva) {
       stato.collegamento = s;
       stato.motivo = motivo || "";
       alMessaggio("collegamento");
-      if (s === "collegato") presentati();
+      if (s === "collegato") {
+        attesoCervello = true;
+        presentati();
+      }
     },
   });
   client.apri();
@@ -132,7 +136,13 @@ async function ricevi(topic, payload) {
   }
   const obj = JSON.parse(dec.decode(dati));
   if (t === "risposte") return risposta(obj);
-  if (t === "cervello") stato.cervello = obj;
+  if (t === "cervello") {
+    stato.cervello = obj;
+    // il cervello si è (ri)collegato mentre la pagina era già collegata: dopo un riavvio non sa
+    // chi c'è, e una pagina che non si ripresenta sembrerebbe un collegamento sconosciuto
+    if (obj.online && !attesoCervello) presentati();
+    attesoCervello = false;
+  }
   else if (t === "allarme") stato.allarme = obj;
   else if (t === "camere") stato.camere = obj;
   else if (t === "luci") stato.luci = obj;
