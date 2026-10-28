@@ -7,19 +7,20 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=fa52ac68";
-import { icona } from "./icone.js?v=fa52ac68";
-import { quandoRidisegnare, stato } from "./stato.js?v=fa52ac68";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=fa52ac68";
-import * as abbinamento from "./sezioni/abbinamento.js?v=fa52ac68";
-import * as allarme from "./sezioni/allarme.js?v=fa52ac68";
-import * as camere from "./sezioni/camere.js?v=fa52ac68";
-import * as luci from "./sezioni/luci.js?v=fa52ac68";
-import * as registro from "./sezioni/registro.js?v=fa52ac68";
-import * as riepilogo from "./sezioni/riepilogo.js?v=fa52ac68";
-import * as sensori from "./sezioni/sensori.js?v=fa52ac68";
-import * as sirene from "./sezioni/sirene.js?v=fa52ac68";
-import * as vacanza from "./sezioni/vacanza.js?v=fa52ac68";
+import * as collegamento from "./collegamento.js?v=e7c25cc5";
+import { icona } from "./icone.js?v=e7c25cc5";
+import { quandoRidisegnare, stato } from "./stato.js?v=e7c25cc5";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=e7c25cc5";
+import * as abbinamento from "./sezioni/abbinamento.js?v=e7c25cc5";
+import * as allarme from "./sezioni/allarme.js?v=e7c25cc5";
+import * as batterie from "./sezioni/batterie.js?v=e7c25cc5";
+import * as camere from "./sezioni/camere.js?v=e7c25cc5";
+import * as luci from "./sezioni/luci.js?v=e7c25cc5";
+import * as registro from "./sezioni/registro.js?v=e7c25cc5";
+import * as riepilogo from "./sezioni/riepilogo.js?v=e7c25cc5";
+import * as sensori from "./sezioni/sensori.js?v=e7c25cc5";
+import * as sirene from "./sezioni/sirene.js?v=e7c25cc5";
+import * as vacanza from "./sezioni/vacanza.js?v=e7c25cc5";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -31,6 +32,7 @@ function htmlDashboard() {
     sensori.porte(),
     sensori.fumoEAcqua(),
     sensori.temperature(),
+    batterie.html(),
     sirene.html(),
     registro.html(),
     vacanza.html(),

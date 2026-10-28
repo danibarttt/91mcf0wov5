@@ -2,15 +2,15 @@
 // finestre, Fumo e acqua, Temperature. Quali sensori stanno in quale sezione lo decidono le
 // liste di config.toml.
 
-import { icona } from "../icone.js?v=fa52ac68";
-import { sensoriDi } from "../stato.js?v=fa52ac68";
-import { apribile, colpoDOcchio, esc, etichetta, gradi, maiuscola, ora, pillola } from "../utili.js?v=fa52ac68";
+import { icona } from "../icone.js?v=e7c25cc5";
+import { sensoriDi } from "../stato.js?v=e7c25cc5";
+import { apribile, colpoDOcchio, esc, etichetta, gradi, maiuscola, ora, pillola } from "../utili.js?v=e7c25cc5";
 
 const SOGLIA_CALDO = 50; // °C, come soglia_temperatura in config.toml
 
 // ---------- porte e finestre ----------
 
-function iconaContatto(nome) {
+export function iconaContatto(nome) {
   const n = nome.toLowerCase();
   if (n.includes("inclinazione")) return "garage";
   if (n.includes("persiana")) return "persiana";

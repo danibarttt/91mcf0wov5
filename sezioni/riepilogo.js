@@ -1,13 +1,12 @@
 // Sotto l'allarme: le pillole del riepilogo (sirene, aperti, luci, temperature, vacanza,
-// pericolo) e la scheda degli avvisi (sirene che suonano, fumo, acqua, batterie scariche) con
-// "Zittisci sirene".
+// pericolo) e la scheda degli avvisi (sirene che suonano, fumo, acqua, batterie scariche di
+// sensori e camere) con "Zittisci sirene".
 
-import { comando } from "../collegamento.js?v=fa52ac68";
-import { icona } from "../icone.js?v=fa52ac68";
-import { sensoriDi, stato } from "../stato.js?v=fa52ac68";
-import { esc, etichetta, gradi, mostra, ora, pillola } from "../utili.js?v=fa52ac68";
-
-const BATTERIA_SCARICA = 15; // %
+import { comando } from "../collegamento.js?v=e7c25cc5";
+import { icona } from "../icone.js?v=e7c25cc5";
+import { sensoriDi, stato } from "../stato.js?v=e7c25cc5";
+import { esc, etichetta, gradi, mostra, ora, pillola } from "../utili.js?v=e7c25cc5";
+import * as batterie from "./batterie.js?v=e7c25cc5";
 
 export function html() {
   return pillole() + avvisi();
@@ -38,13 +37,13 @@ function pillole() {
 function avvisi() {
   const sensori = [...stato.sensori.values()];
   const pericoli = sensori.filter((s) => s.fumo || s.acqua);
-  const batterie = sensori.filter((s) => s.batt_bassa || (s.batt != null && s.batt <= BATTERIA_SCARICA));
+  const scariche = batterie.dispositivi().filter(batterie.scarica);
   const suonano = stato.suonano;
-  if (!suonano.length && !pericoli.length && !batterie.length) return "";
+  if (!suonano.length && !pericoli.length && !scariche.length) return "";
   const righe = [
     ...suonano.map((x) => `<li>${icona("sirena")}<span>Suona: ${esc(etichetta(x.n))}<span class="nota">${esc(comeFinisce(x))}</span></span></li>`),
     ...pericoli.map((s) => `<li>${icona(s.fumo ? "fiamma" : "goccia")}${s.fumo ? "Fumo" : "Acqua"}: ${esc(etichetta(s.n))}</li>`),
-    ...batterie.map((s) => `<li>${icona("batteria")}Batteria scarica: ${esc(etichetta(s.n))}${s.batt != null ? ` (${s.batt}%)` : ""}</li>`),
+    ...scariche.map((d) => `<li>${icona("batteria")}Batteria scarica: ${esc(d.n)}${d.batt != null ? ` (${d.batt}%)` : ""}</li>`),
   ];
   const zittisci = suonano.length || pericoli.length
     ? `<div class="azioni"><button data-azione="zittisci_sirene" class="bottone pericolo">${icona("muto")}Zittisci sirene</button></div>`
