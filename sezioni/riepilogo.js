@@ -1,10 +1,10 @@
 // Sotto l'allarme: le pillole del riepilogo (aperti, luci, temperature, vacanza, pericolo) e
 // la scheda degli avvisi (fumo, acqua, batterie scariche) con "Zittisci sirene".
 
-import { comando } from "../collegamento.js?v=91c42921";
-import { icona } from "../icone.js?v=91c42921";
-import { sensoriDi, stato } from "../stato.js?v=91c42921";
-import { esc, etichetta, gradi, mostra, pillola } from "../utili.js?v=91c42921";
+import { comando } from "../collegamento.js?v=80d1de4c";
+import { icona } from "../icone.js?v=80d1de4c";
+import { sensoriDi, stato } from "../stato.js?v=80d1de4c";
+import { esc, etichetta, gradi, mostra, pillola } from "../utili.js?v=80d1de4c";
 
 const BATTERIA_SCARICA = 15; // %
 
@@ -17,6 +17,8 @@ function pillole() {
   const sensori = [...stato.sensori.values()];
   if (sensori.some((s) => s.fumo || s.acqua)) p.push(pillola("Pericolo", "attenzione", "pericolo"));
   if (stato.allarme.vacanza) p.push(pillola("In vacanza", "valigia", "vacanza"));
+  if (stato.sirene?.prova) p.push(pillola("Sirene al minimo (simulazione)", "muto", "attenzione"));
+  else if (stato.sirene?.elenco.some((x) => x.ok === false)) p.push(pillola("Sirene da controllare", "attenzione", "attenzione"));
   const aperti = sensoriDi("porte").filter((s) => s.aperto).length;
   p.push(aperti ? pillola(aperti === 1 ? "1 aperto" : `${aperti} aperti`, "porta", "attenzione") : pillola("Tutto chiuso", "ok", "ok"));
   if (stato.luci.length) {

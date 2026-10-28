@@ -7,18 +7,19 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=91c42921";
-import { icona } from "./icone.js?v=91c42921";
-import { quandoRidisegnare, stato } from "./stato.js?v=91c42921";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=91c42921";
-import * as abbinamento from "./sezioni/abbinamento.js?v=91c42921";
-import * as allarme from "./sezioni/allarme.js?v=91c42921";
-import * as camere from "./sezioni/camere.js?v=91c42921";
-import * as luci from "./sezioni/luci.js?v=91c42921";
-import * as registro from "./sezioni/registro.js?v=91c42921";
-import * as riepilogo from "./sezioni/riepilogo.js?v=91c42921";
-import * as sensori from "./sezioni/sensori.js?v=91c42921";
-import * as vacanza from "./sezioni/vacanza.js?v=91c42921";
+import * as collegamento from "./collegamento.js?v=80d1de4c";
+import { icona } from "./icone.js?v=80d1de4c";
+import { quandoRidisegnare, stato } from "./stato.js?v=80d1de4c";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=80d1de4c";
+import * as abbinamento from "./sezioni/abbinamento.js?v=80d1de4c";
+import * as allarme from "./sezioni/allarme.js?v=80d1de4c";
+import * as camere from "./sezioni/camere.js?v=80d1de4c";
+import * as luci from "./sezioni/luci.js?v=80d1de4c";
+import * as registro from "./sezioni/registro.js?v=80d1de4c";
+import * as riepilogo from "./sezioni/riepilogo.js?v=80d1de4c";
+import * as sensori from "./sezioni/sensori.js?v=80d1de4c";
+import * as sirene from "./sezioni/sirene.js?v=80d1de4c";
+import * as vacanza from "./sezioni/vacanza.js?v=80d1de4c";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -30,13 +31,15 @@ function htmlDashboard() {
     sensori.porte(),
     sensori.fumoEAcqua(),
     sensori.temperature(),
+    sirene.html(),
     registro.html(),
     vacanza.html(),
+    sirene.simulazioni(),
     abbinamento.piede(),
   ].join("");
 }
 
-const azioni = { ...abbinamento.azioni, ...allarme.azioni, ...camere.azioni, ...luci.azioni, ...registro.azioni, ...riepilogo.azioni };
+const azioni = { ...abbinamento.azioni, ...allarme.azioni, ...camere.azioni, ...luci.azioni, ...registro.azioni, ...riepilogo.azioni, ...sirene.azioni };
 const cambi = { ...vacanza.cambi };
 
 // ---------- disegno ----------

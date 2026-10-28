@@ -1,13 +1,14 @@
 // Il registro delle ultime 24 ore, chiesto al cervello quando si apre la sezione.
 
-import { comando } from "../collegamento.js?v=91c42921";
-import { icona } from "../icone.js?v=91c42921";
-import { ridisegna, stato } from "../stato.js?v=91c42921";
-import { apribile, esc, etichetta, maiuscola } from "../utili.js?v=91c42921";
+import { comando } from "../collegamento.js?v=80d1de4c";
+import { icona } from "../icone.js?v=80d1de4c";
+import { ridisegna, stato } from "../stato.js?v=80d1de4c";
+import { apribile, esc, etichetta, maiuscola } from "../utili.js?v=80d1de4c";
 
 const ICONE = {
   allarme: "scudo", vacanza: "valigia", contatto: "porta", persona: "persona", fumo: "fiamma", acqua: "goccia",
   temperatura: "termometro", bottone: "bottone", luci: "lampadina", avvio: "avvio", dashboard: "scudo",
+  simulazione: "scudoOk", sirene: "muto",
 };
 // "inserito"/"disinserito": nomi usati fino al 27/10/2026, ancora nelle voci vecchie
 const PAROLE_ALLARME = { acceso: "acceso", spento: "spento", scattato: "scattato", inserito: "acceso", disinserito: "spento" };
@@ -24,6 +25,8 @@ function voce([quando, tipo, fonte, testo]) {
   else if (tipo === "luci") cosa = `Luci ${esc(testo)} ${di}`;
   else if (tipo === "avvio") cosa = `Cervello avviato (${esc(testo)})`;
   else if (tipo === "vacanza") cosa = `Modalità vacanza ${esc(testo)} ${di}`;
+  else if (tipo === "simulazione") cosa = `Simulazione ${esc(testo)}: ${esc(fonte)}`;
+  else if (tipo === "sirene") cosa = `Sirene: ${esc(testo)} ${di}`;
   else cosa = `${esc(maiuscola(tipo))} · ${esc(etichetta(fonte))}: ${esc(testo)}`;
   const hm = new Date(quando).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
   return `<li><span class="punto">${icona(ICONE[tipo] || "orologio")}</span><div><div class="cosa">${cosa}</div><div class="ora">${hm}</div></div></li>`;
