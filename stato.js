@@ -12,6 +12,7 @@ export const stato = {
   sirene: null, // {letto, prova, elenco: [{n, ok, d}]}
   suonano: [], // le sirene che suonano adesso: [{n, fino?, errore?}]
   batterie: [], // le camere a batteria: [{c, n, batt, carica}] (quelle Zigbee stanno in sensori)
+  muti: [], // i sensori che non si fanno sentire da troppo (forse morti): [{n, visto}]
   sensori: new Map(), // id -> {n, g: [gruppi], aperto, fumo, acqua, temp, batt, batt_bassa, q}
   foto: new Map(), // canale -> URL dell'ultima foto
   registro: null, // [[quando, tipo, fonte, testo]], caricato all'apertura della sezione

@@ -1,12 +1,12 @@
 // Sotto l'allarme: le pillole del riepilogo (sirene, aperti, luci, temperature, vacanza,
 // pericolo) e la scheda degli avvisi (sirene che suonano, fumo, acqua, batterie scariche di
-// sensori e camere) con "Zittisci sirene".
+// sensori e camere, sensori muti) con "Zittisci sirene".
 
-import { comando } from "../collegamento.js?v=1e91316d";
-import { icona } from "../icone.js?v=1e91316d";
-import { sensoriDi, stato } from "../stato.js?v=1e91316d";
-import { esc, etichetta, gradi, mostra, ora, pillola } from "../utili.js?v=1e91316d";
-import * as batterie from "./batterie.js?v=1e91316d";
+import { comando } from "../collegamento.js?v=34cf9561";
+import { icona } from "../icone.js?v=34cf9561";
+import { sensoriDi, stato } from "../stato.js?v=34cf9561";
+import { esc, etichetta, gradi, mostra, ora, pillola } from "../utili.js?v=34cf9561";
+import * as batterie from "./batterie.js?v=34cf9561";
 
 export function html() {
   return pillole() + avvisi();
@@ -39,11 +39,13 @@ function avvisi() {
   const pericoli = sensori.filter((s) => s.fumo || s.acqua);
   const scariche = batterie.dispositivi().filter(batterie.scarica);
   const suonano = stato.suonano;
-  if (!suonano.length && !pericoli.length && !scariche.length) return "";
+  const muti = stato.muti;
+  if (!suonano.length && !pericoli.length && !scariche.length && !muti.length) return "";
   const righe = [
     ...suonano.map((x) => `<li>${icona("sirena")}<span>Suona: ${esc(etichetta(x.n))}<span class="nota">${esc(comeFinisce(x))}</span></span></li>`),
     ...pericoli.map((s) => `<li>${icona(s.fumo ? "fiamma" : "goccia")}${s.fumo ? "Fumo" : "Acqua"}: ${esc(etichetta(s.n))}</li>`),
     ...scariche.map((d) => `<li>${icona("batteria")}Batteria scarica: ${esc(d.n)}${d.batt != null ? ` (${d.batt}%)` : ""}</li>`),
+    ...muti.map((m) => `<li>${icona("attenzione")}<span>Non si sente: ${esc(etichetta(m.n))}<span class="nota">${m.visto ? `ultima volta ${esc(ora(m.visto))}` : "mai sentito"}</span></span></li>`),
   ];
   const zittisci = suonano.length || pericoli.length
     ? `<div class="azioni"><button data-azione="zittisci_sirene" class="bottone pericolo">${icona("muto")}Zittisci sirene</button></div>`

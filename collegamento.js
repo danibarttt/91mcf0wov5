@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=1e91316d";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=1e91316d";
-import { stato } from "./stato.js?v=1e91316d";
+import { Mqtt } from "./mqtt.js?v=34cf9561";
+import { importaChiave, cifra, decifra } from "./cifra.js?v=34cf9561";
+import { stato } from "./stato.js?v=34cf9561";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const PORTA_WS = 8084;
@@ -81,7 +81,7 @@ export async function collega(quandoArriva) {
     clientId: `casa-web-${casuale(5)}`,
     utente: abbinamento.u,
     password: abbinamento.p,
-    argomenti: ["cervello", "allarme", "camere", "luci", "sirene", "suonano", "batterie", "risposte", "sensori/+", "foto/+"].map((t) => `${P}/${t}`),
+    argomenti: ["cervello", "allarme", "camere", "luci", "sirene", "suonano", "batterie", "muti", "risposte", "sensori/+", "foto/+"].map((t) => `${P}/${t}`),
     onMessaggio: (topic, payload) => ricevi(topic, payload).catch((e) => console.error(topic, e)),
     onStato: (s, motivo) => {
       stato.collegamento = s;
@@ -121,6 +121,7 @@ async function ricevi(topic, payload) {
   else if (t === "sirene") stato.sirene = obj;
   else if (t === "suonano") stato.suonano = obj;
   else if (t === "batterie") stato.batterie = obj;
+  else if (t === "muti") stato.muti = obj;
   else if (t.startsWith("sensori/")) stato.sensori.set(t.slice(8), obj);
   alMessaggio(t);
 }
