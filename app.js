@@ -7,21 +7,21 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=47ec85e7";
-import { icona } from "./icone.js?v=47ec85e7";
-import { quandoRidisegnare, stato } from "./stato.js?v=47ec85e7";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=47ec85e7";
-import * as abbinamento from "./sezioni/abbinamento.js?v=47ec85e7";
-import * as accessi from "./sezioni/accessi.js?v=47ec85e7";
-import * as allarme from "./sezioni/allarme.js?v=47ec85e7";
-import * as batterie from "./sezioni/batterie.js?v=47ec85e7";
-import * as camere from "./sezioni/camere.js?v=47ec85e7";
-import * as luci from "./sezioni/luci.js?v=47ec85e7";
-import * as registro from "./sezioni/registro.js?v=47ec85e7";
-import * as riepilogo from "./sezioni/riepilogo.js?v=47ec85e7";
-import * as sensori from "./sezioni/sensori.js?v=47ec85e7";
-import * as sirene from "./sezioni/sirene.js?v=47ec85e7";
-import * as vacanza from "./sezioni/vacanza.js?v=47ec85e7";
+import * as collegamento from "./collegamento.js?v=e1c5513a";
+import { icona } from "./icone.js?v=e1c5513a";
+import { quandoRidisegnare, stato } from "./stato.js?v=e1c5513a";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=e1c5513a";
+import * as abbinamento from "./sezioni/abbinamento.js?v=e1c5513a";
+import * as accessi from "./sezioni/accessi.js?v=e1c5513a";
+import * as allarme from "./sezioni/allarme.js?v=e1c5513a";
+import * as batterie from "./sezioni/batterie.js?v=e1c5513a";
+import * as camere from "./sezioni/camere.js?v=e1c5513a";
+import * as luci from "./sezioni/luci.js?v=e1c5513a";
+import * as registro from "./sezioni/registro.js?v=e1c5513a";
+import * as riepilogo from "./sezioni/riepilogo.js?v=e1c5513a";
+import * as sensori from "./sezioni/sensori.js?v=e1c5513a";
+import * as sirene from "./sezioni/sirene.js?v=e1c5513a";
+import * as vacanza from "./sezioni/vacanza.js?v=e1c5513a";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -73,9 +73,17 @@ function disegna() {
   });
 }
 
+// i rifiuti del broker, per cui la pagina smette di riprovare da sola (vedi mqtt.js):
+// motivo -> [testo del pallino, spiegazione al posto dello spinner]
+const RIFIUTI = {
+  "credenziali rifiutate": ["Credenziali rifiutate", "Credenziali rifiutate: riabbina il telefono col QR."],
+  "iscrizione rifiutata": ["Iscrizione rifiutata", "Il broker ha rifiutato l'iscrizione: i dati di casa non possono arrivare."],
+};
+
 function htmlCaricamento() {
-  if (stato.collegamento === "scollegato" && stato.motivo === "credenziali rifiutate") {
-    return `<div class="caricamento"><div class="disco-errore">${icona("attenzione")}</div><p>Credenziali rifiutate: riabbina il telefono col QR.</p></div>`;
+  const rifiuto = stato.collegamento === "scollegato" && RIFIUTI[stato.motivo];
+  if (rifiuto) {
+    return `<div class="caricamento"><div class="disco-errore">${icona("attenzione")}</div><p>${rifiuto[1]}</p></div>`;
   }
   const testo = stato.collegamento === "collegato" ? "Aspetto i dati di casa…" : "Mi collego a casa…";
   return `<div class="caricamento"><div class="spinner" role="progressbar" aria-label="Caricamento"></div><p>${testo}</p></div>`;
@@ -89,7 +97,7 @@ function disegnaCollegamento() {
   else if (s === "collegato" && stato.cervello && !stato.cervello.online) {
     s = "scollegato";
     testo = "Casa non risponde";
-  } else if (s === "scollegato" && stato.motivo === "credenziali rifiutate") testo = "Credenziali rifiutate";
+  } else if (s === "scollegato" && RIFIUTI[stato.motivo]) testo = RIFIUTI[stato.motivo][0];
   $("collegamento").dataset.stato = s;
   $("collegamento").querySelector("span").textContent = testo;
 }

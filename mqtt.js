@@ -158,10 +158,12 @@ export class Mqtt {
         return;
       }
       case 9: {
-        // SUBACK: un codice 0x80 è un'iscrizione rifiutata, e quei messaggi non arriverebbero mai
+        // SUBACK: un codice 0x80 è un'iscrizione rifiutata, e quei messaggi non arriverebbero
+        // mai. Come per le credenziali, inutile riprovare da soli: si riprova riaprendo la pagina
         if (corpo.subarray(2).includes(0x80)) {
           console.error("iscrizione rifiutata dal broker", this.argomenti);
-          this.motivo = "iscrizione rifiutata dal broker";
+          this.chiuso = true;
+          this.motivo = "iscrizione rifiutata";
           this.ws.close();
         }
         return;
