@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=3dca94d0";
-import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=3dca94d0";
-import { stato } from "./stato.js?v=3dca94d0";
+import { Mqtt } from "./mqtt.js?v=47ec85e7";
+import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=47ec85e7";
+import { stato } from "./stato.js?v=47ec85e7";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
@@ -97,8 +97,8 @@ export async function collega(quandoArriva) {
     clientId: `casa-web-${casuale(5)}`,
     utente: abbinamento.u,
     password: abbinamento.p,
-    // una sola iscrizione per tutto: EMQX Cloud ne accetta al massimo 10 per client e rifiuta
-    // le altre (il 29/10/2026 alla undicesima, foto/+, le foto non arrivavano più)
+    // una sola iscrizione per tutto: EMQX Cloud dichiara al massimo 10 iscrizioni per client
+    // (la pagina ne chiedeva 11), così non ci si avvicina più
     argomenti: [`${P}/#`],
     onMessaggio: (topic, payload) => ricevi(topic, payload).catch((e) => console.error(topic, e)),
     onStato: (s, motivo) => {

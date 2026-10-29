@@ -2,10 +2,10 @@
 // casa", e il pannello con interruttore e cursori di luminosità, bianco e colore
 // (<dialog id="luce"> in index.html).
 
-import { comando } from "../collegamento.js?v=3dca94d0";
-import { icona } from "../icone.js?v=3dca94d0";
-import { stato } from "../stato.js?v=3dca94d0";
-import { $, esc, maiuscola, mostra, sezione } from "../utili.js?v=3dca94d0";
+import { comando } from "../collegamento.js?v=47ec85e7";
+import { icona } from "../icone.js?v=47ec85e7";
+import { stato } from "../stato.js?v=47ec85e7";
+import { $, esc, maiuscola, mostra, sezione } from "../utili.js?v=47ec85e7";
 
 const CURSORE_OGNI_MS = 250; // mentre si trascina un cursore, al massimo un comando ogni tanto
 

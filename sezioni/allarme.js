@@ -1,10 +1,10 @@
 // La scheda dell'allarme in cima: spento (grigio), acceso (rosso), scattato; Accendi/Spegni.
 // Durante il pre-allarme delle persiane l'allarme resta acceso: il dettaglio lo dice.
 
-import { comando } from "../collegamento.js?v=3dca94d0";
-import { icona } from "../icone.js?v=3dca94d0";
-import { stato } from "../stato.js?v=3dca94d0";
-import { conferma, esc, mostra, ora } from "../utili.js?v=3dca94d0";
+import { comando } from "../collegamento.js?v=47ec85e7";
+import { icona } from "../icone.js?v=47ec85e7";
+import { stato } from "../stato.js?v=47ec85e7";
+import { conferma, esc, etichetta, mostra, ora } from "../utili.js?v=47ec85e7";
 
 const TITOLI = { spento: "Spento", acceso: "Acceso", scattato: "Scattato!" };
 const SIMBOLI = { spento: "scudo", acceso: "scudoOk", scattato: "scudoAllarme" };
@@ -16,7 +16,7 @@ export function html() {
       ? `<button data-azione="accendi_allarme" class="bottone pericolo">${icona("scudoOk")}Accendi</button>`
       : `<button data-azione="spegni_allarme" class="bottone ${a.stato === "scattato" ? "pericolo" : "secondario"}">${icona("scudo")}Spegni</button>`;
   const dettaglio = a.stato === "scattato" ? esc(a.perche)
-    : a.preallarme ? `Pre-allarme: ${esc(a.preallarme.causa)}`
+    : a.preallarme ? `Pre-allarme: ${esc(etichetta(a.preallarme.causa))}`
     : `${ora(a.dal)} · ${esc(a.perche)}`;
   return `
     <section class="scheda allarme" data-stato="${esc(a.stato)}">

@@ -80,9 +80,6 @@ button { font: inherit; color: inherit; }
 .collegamento i { width: 8px; height: 8px; border-radius: 50%; background: var(--attenzione); }
 .collegamento[data-stato="collegato"] i { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-tenue); }
 .collegamento[data-stato="scollegato"] i { background: var(--pericolo); }
-.barra-destra { display: flex; align-items: center; gap: 8px; }
-.barra-destra .bottone-icona { width: 36px; height: 36px; background: var(--carta); box-shadow: var(--ombra); }
-.barra-destra .bottone-icona .ic { width: 19px; height: 19px; }
 
 main { max-width: 760px; margin: 0 auto; padding: 6px 16px 40px; }
 

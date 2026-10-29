@@ -7,21 +7,21 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=3dca94d0";
-import { icona } from "./icone.js?v=3dca94d0";
-import { quandoRidisegnare, stato } from "./stato.js?v=3dca94d0";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=3dca94d0";
-import * as abbinamento from "./sezioni/abbinamento.js?v=3dca94d0";
-import * as accessi from "./sezioni/accessi.js?v=3dca94d0";
-import * as allarme from "./sezioni/allarme.js?v=3dca94d0";
-import * as batterie from "./sezioni/batterie.js?v=3dca94d0";
-import * as camere from "./sezioni/camere.js?v=3dca94d0";
-import * as luci from "./sezioni/luci.js?v=3dca94d0";
-import * as registro from "./sezioni/registro.js?v=3dca94d0";
-import * as riepilogo from "./sezioni/riepilogo.js?v=3dca94d0";
-import * as sensori from "./sezioni/sensori.js?v=3dca94d0";
-import * as sirene from "./sezioni/sirene.js?v=3dca94d0";
-import * as vacanza from "./sezioni/vacanza.js?v=3dca94d0";
+import * as collegamento from "./collegamento.js?v=47ec85e7";
+import { icona } from "./icone.js?v=47ec85e7";
+import { quandoRidisegnare, stato } from "./stato.js?v=47ec85e7";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=47ec85e7";
+import * as abbinamento from "./sezioni/abbinamento.js?v=47ec85e7";
+import * as accessi from "./sezioni/accessi.js?v=47ec85e7";
+import * as allarme from "./sezioni/allarme.js?v=47ec85e7";
+import * as batterie from "./sezioni/batterie.js?v=47ec85e7";
+import * as camere from "./sezioni/camere.js?v=47ec85e7";
+import * as luci from "./sezioni/luci.js?v=47ec85e7";
+import * as registro from "./sezioni/registro.js?v=47ec85e7";
+import * as riepilogo from "./sezioni/riepilogo.js?v=47ec85e7";
+import * as sensori from "./sezioni/sensori.js?v=47ec85e7";
+import * as sirene from "./sezioni/sirene.js?v=47ec85e7";
+import * as vacanza from "./sezioni/vacanza.js?v=47ec85e7";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -160,11 +160,6 @@ document.addEventListener(
   },
   true,
 );
-
-// il pulsante in alto a destra: ricarica la pagina, come il refresh del browser (che nell'app
-// installata non c'è): nuovo collegamento, stato da capo e l'ultima versione della dashboard
-$("aggiorna").innerHTML = icona("aggiorna");
-$("aggiorna").addEventListener("click", () => location.reload());
 
 // in secondo piano il sistema chiude la connessione: al ritorno si riapre subito
 document.addEventListener("visibilitychange", () => {
