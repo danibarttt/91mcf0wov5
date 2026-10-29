@@ -1,14 +1,14 @@
 // Il registro delle ultime 24 ore, chiesto al cervello quando si apre la sezione.
 
-import { comando } from "../collegamento.js?v=00fc998d";
-import { icona } from "../icone.js?v=00fc998d";
-import { ridisegna, stato } from "../stato.js?v=00fc998d";
-import { apribile, esc, etichetta, maiuscola } from "../utili.js?v=00fc998d";
+import { comando } from "../collegamento.js?v=3ea7d1f2";
+import { icona } from "../icone.js?v=3ea7d1f2";
+import { ridisegna, stato } from "../stato.js?v=3ea7d1f2";
+import { apribile, esc, etichetta, maiuscola } from "../utili.js?v=3ea7d1f2";
 
 const ICONE = {
   allarme: "scudo", vacanza: "valigia", contatto: "porta", persona: "persona", fumo: "fiamma", acqua: "goccia",
   temperatura: "termometro", bottone: "bottone", luci: "lampadina", avvio: "avvio", dashboard: "scudo",
-  simulazione: "scudoOk", sirene: "muto",
+  simulazione: "scudoOk", sirene: "muto", preallarme: "sirena",
 };
 // "inserito"/"disinserito": nomi usati fino al 27/10/2026, ancora nelle voci vecchie
 const PAROLE_ALLARME = { acceso: "acceso", spento: "spento", scattato: "scattato", inserito: "acceso", disinserito: "spento" };
@@ -24,6 +24,7 @@ function voce([quando, tipo, fonte, testo]) {
   else if (tipo === "bottone") cosa = `${esc(etichetta(fonte))} premuto`;
   else if (tipo === "luci") cosa = `Luci ${esc(testo)} ${di}`;
   else if (tipo === "avvio") cosa = `Cervello avviato (${esc(testo)})`;
+  else if (tipo === "preallarme") cosa = `Pre-allarme persiane ${esc(testo)} ${di}`;
   else if (tipo === "vacanza") cosa = `Modalità vacanza ${esc(testo)} ${di}`;
   else if (tipo === "simulazione") cosa = `Simulazione ${esc(testo)}: ${esc(fonte)}`;
   else if (tipo === "sirene") cosa = `Sirene: ${esc(testo)} ${di}`;

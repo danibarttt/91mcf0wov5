@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=00fc998d";
-import { importaChiave, cifra, decifra } from "./cifra.js?v=00fc998d";
-import { stato } from "./stato.js?v=00fc998d";
+import { Mqtt } from "./mqtt.js?v=3ea7d1f2";
+import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=3ea7d1f2";
+import { stato } from "./stato.js?v=3ea7d1f2";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
@@ -175,7 +175,7 @@ export async function comando(azione, argomenti = {}) {
   if (!client || !client.collegato) throw new Error("Non collegato a casa");
   const id = casuale(8);
   const msg = { ...argomenti, id, ts: Date.now(), nonce: casuale(), a: azione };
-  const blob = await cifra(chiave, `${P}/comandi`, enc.encode(JSON.stringify(msg)));
+  const blob = await cifra(chiave, `${P}/comandi`, imbottisci(enc.encode(JSON.stringify(msg))));
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       inAttesa.delete(id);

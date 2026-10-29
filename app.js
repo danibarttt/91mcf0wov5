@@ -7,21 +7,21 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=00fc998d";
-import { icona } from "./icone.js?v=00fc998d";
-import { quandoRidisegnare, stato } from "./stato.js?v=00fc998d";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=00fc998d";
-import * as abbinamento from "./sezioni/abbinamento.js?v=00fc998d";
-import * as accessi from "./sezioni/accessi.js?v=00fc998d";
-import * as allarme from "./sezioni/allarme.js?v=00fc998d";
-import * as batterie from "./sezioni/batterie.js?v=00fc998d";
-import * as camere from "./sezioni/camere.js?v=00fc998d";
-import * as luci from "./sezioni/luci.js?v=00fc998d";
-import * as registro from "./sezioni/registro.js?v=00fc998d";
-import * as riepilogo from "./sezioni/riepilogo.js?v=00fc998d";
-import * as sensori from "./sezioni/sensori.js?v=00fc998d";
-import * as sirene from "./sezioni/sirene.js?v=00fc998d";
-import * as vacanza from "./sezioni/vacanza.js?v=00fc998d";
+import * as collegamento from "./collegamento.js?v=3ea7d1f2";
+import { icona } from "./icone.js?v=3ea7d1f2";
+import { quandoRidisegnare, stato } from "./stato.js?v=3ea7d1f2";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=3ea7d1f2";
+import * as abbinamento from "./sezioni/abbinamento.js?v=3ea7d1f2";
+import * as accessi from "./sezioni/accessi.js?v=3ea7d1f2";
+import * as allarme from "./sezioni/allarme.js?v=3ea7d1f2";
+import * as batterie from "./sezioni/batterie.js?v=3ea7d1f2";
+import * as camere from "./sezioni/camere.js?v=3ea7d1f2";
+import * as luci from "./sezioni/luci.js?v=3ea7d1f2";
+import * as registro from "./sezioni/registro.js?v=3ea7d1f2";
+import * as riepilogo from "./sezioni/riepilogo.js?v=3ea7d1f2";
+import * as sensori from "./sezioni/sensori.js?v=3ea7d1f2";
+import * as sirene from "./sezioni/sirene.js?v=3ea7d1f2";
+import * as vacanza from "./sezioni/vacanza.js?v=3ea7d1f2";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {

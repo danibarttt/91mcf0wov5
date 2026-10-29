@@ -2,6 +2,15 @@
 // nonce (12 byte) + testo cifrato con tag, topic MQTT come dato associato.
 
 const enc = new TextEncoder();
+const BLOCCO = 256;
+
+// il JSON allungato con spazi a un multiplo di BLOCCO byte: la cifratura non nasconde la
+// lunghezza, che altrimenti direbbe quale comando è partito
+export function imbottisci(json) {
+  const out = new Uint8Array(json.length + ((BLOCCO - (json.length % BLOCCO)) % BLOCCO)).fill(0x20);
+  out.set(json, 0);
+  return out;
+}
 
 export async function importaChiave(base64) {
   const grezza = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
