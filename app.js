@@ -7,21 +7,21 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=b6000b80";
-import { icona } from "./icone.js?v=b6000b80";
-import { quandoRidisegnare, stato } from "./stato.js?v=b6000b80";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=b6000b80";
-import * as abbinamento from "./sezioni/abbinamento.js?v=b6000b80";
-import * as accessi from "./sezioni/accessi.js?v=b6000b80";
-import * as allarme from "./sezioni/allarme.js?v=b6000b80";
-import * as batterie from "./sezioni/batterie.js?v=b6000b80";
-import * as camere from "./sezioni/camere.js?v=b6000b80";
-import * as luci from "./sezioni/luci.js?v=b6000b80";
-import * as registro from "./sezioni/registro.js?v=b6000b80";
-import * as riepilogo from "./sezioni/riepilogo.js?v=b6000b80";
-import * as sensori from "./sezioni/sensori.js?v=b6000b80";
-import * as sirene from "./sezioni/sirene.js?v=b6000b80";
-import * as vacanza from "./sezioni/vacanza.js?v=b6000b80";
+import * as collegamento from "./collegamento.js?v=3dca94d0";
+import { icona } from "./icone.js?v=3dca94d0";
+import { quandoRidisegnare, stato } from "./stato.js?v=3dca94d0";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=3dca94d0";
+import * as abbinamento from "./sezioni/abbinamento.js?v=3dca94d0";
+import * as accessi from "./sezioni/accessi.js?v=3dca94d0";
+import * as allarme from "./sezioni/allarme.js?v=3dca94d0";
+import * as batterie from "./sezioni/batterie.js?v=3dca94d0";
+import * as camere from "./sezioni/camere.js?v=3dca94d0";
+import * as luci from "./sezioni/luci.js?v=3dca94d0";
+import * as registro from "./sezioni/registro.js?v=3dca94d0";
+import * as riepilogo from "./sezioni/riepilogo.js?v=3dca94d0";
+import * as sensori from "./sezioni/sensori.js?v=3dca94d0";
+import * as sirene from "./sezioni/sirene.js?v=3dca94d0";
+import * as vacanza from "./sezioni/vacanza.js?v=3dca94d0";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -143,7 +143,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ricorda quali sezioni a scomparsa sono aperte; registro e accessi si chiedono al cervello
-// quando si aprono
+// quando si aprono (il registro a ogni apertura)
 function sezioneAperta(id, aperta) {
   if (aperta === sezioniAperte.has(id)) return;
   aperta ? sezioniAperte.add(id) : sezioniAperte.delete(id);
@@ -160,6 +160,11 @@ document.addEventListener(
   },
   true,
 );
+
+// il pulsante in alto a destra: ricarica la pagina, come il refresh del browser (che nell'app
+// installata non c'è): nuovo collegamento, stato da capo e l'ultima versione della dashboard
+$("aggiorna").innerHTML = icona("aggiorna");
+$("aggiorna").addEventListener("click", () => location.reload());
 
 // in secondo piano il sistema chiude la connessione: al ritorno si riapre subito
 document.addEventListener("visibilitychange", () => {

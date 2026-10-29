@@ -1,9 +1,10 @@
-// Il registro delle ultime 24 ore, chiesto al cervello quando si apre la sezione.
+// Il registro delle ultime 24 ore, chiesto al cervello a ogni apertura della sezione e col
+// pulsante "Aggiorna" in cima.
 
-import { comando } from "../collegamento.js?v=b6000b80";
-import { icona } from "../icone.js?v=b6000b80";
-import { ridisegna, stato } from "../stato.js?v=b6000b80";
-import { apribile, esc, etichetta, maiuscola } from "../utili.js?v=b6000b80";
+import { comando } from "../collegamento.js?v=3dca94d0";
+import { icona } from "../icone.js?v=3dca94d0";
+import { ridisegna, stato } from "../stato.js?v=3dca94d0";
+import { apribile, esc, etichetta, maiuscola } from "../utili.js?v=3dca94d0";
 
 const ICONE = {
   allarme: "scudo", vacanza: "valigia", contatto: "porta", persona: "persona", fumo: "fiamma", acqua: "goccia",
@@ -40,25 +41,28 @@ export function html() {
     const voci = [...stato.registro].reverse().map(voce);
     corpo = voci.length ? `<ul class="registro">${voci.join("")}</ul>` : `<p class="vuoto">Niente da segnalare.</p>`;
   }
-  const aggiorna = `<div class="azioni sinistra registro-azioni"><button data-azione="aggiorna_registro" class="bottone secondario">${icona("avvio")}Aggiorna</button></div>`;
-  return apribile("registro", "Registro", `<div class="scheda scheda-elenco">${corpo}</div>${aggiorna}`, "ultime 24 ore");
+  const quando = registroDelle ? `Aggiornato alle ${registroDelle.toLocaleTimeString("it-IT")}` : "";
+  const testa = `<div class="registro-testa"><span class="nota">${quando}</span><button data-azione="aggiorna_registro" class="bottone secondario">${icona("aggiorna")}Aggiorna</button></div>`;
+  return apribile("registro", "Registro", `${testa}<div class="scheda scheda-elenco">${corpo}</div>`, "ultime 24 ore");
 }
 
 // una richiesta alla volta: ridisegnando, una sezione già aperta può rimandare "toggle"
 let inArrivo = null;
+let registroDelle = null; // quando è arrivato quello mostrato
 function carica() {
   inArrivo ??= comando("registro")
     .then((voci) => {
       stato.registro = voci;
+      registroDelle = new Date();
       ridisegna();
     })
     .finally(() => (inArrivo = null));
   return inArrivo;
 }
 
-// all'apertura della sezione (vedi app.js): la prima volta si carica
+// a ogni apertura della sezione (vedi app.js); intanto resta quello di prima
 export async function aperta() {
-  if (stato.registro == null) await carica();
+  await carica();
 }
 
 export const azioni = {

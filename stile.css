@@ -80,6 +80,9 @@ button { font: inherit; color: inherit; }
 .collegamento i { width: 8px; height: 8px; border-radius: 50%; background: var(--attenzione); }
 .collegamento[data-stato="collegato"] i { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-tenue); }
 .collegamento[data-stato="scollegato"] i { background: var(--pericolo); }
+.barra-destra { display: flex; align-items: center; gap: 8px; }
+.barra-destra .bottone-icona { width: 36px; height: 36px; background: var(--carta); box-shadow: var(--ombra); }
+.barra-destra .bottone-icona .ic { width: 19px; height: 19px; }
 
 main { max-width: 760px; margin: 0 auto; padding: 6px 16px 40px; }
 
@@ -119,7 +122,10 @@ main.entra > *:nth-child(n + 4) { animation-delay: 0.12s; }
 .apribile[open] .freccia { transform: rotate(180deg); }
 .apribile[open] > summary { margin-bottom: 0; }
 .colpo-occhio { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
-.registro-azioni { margin-top: 12px; }
+.registro-testa { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 4px 10px; }
+.registro-testa .nota { color: var(--tenue); font-size: 13px; }
+.registro-testa .bottone { min-height: 38px; padding: 8px 14px; font-size: 15px; }
+.registro-testa .bottone .ic { width: 18px; height: 18px; }
 
 /* ---------- allarme ---------- */
 .allarme { display: flex; align-items: center; gap: 16px; padding: 18px; margin-top: 8px; }
