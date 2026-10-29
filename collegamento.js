@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=3ea7d1f2";
-import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=3ea7d1f2";
-import { stato } from "./stato.js?v=3ea7d1f2";
+import { Mqtt } from "./mqtt.js?v=b6000b80";
+import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=b6000b80";
+import { stato } from "./stato.js?v=b6000b80";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
@@ -97,7 +97,9 @@ export async function collega(quandoArriva) {
     clientId: `casa-web-${casuale(5)}`,
     utente: abbinamento.u,
     password: abbinamento.p,
-    argomenti: ["cervello", "allarme", "camere", "luci", "sirene", "suonano", "batterie", "muti", "risposte", "sensori/+", "foto/+"].map((t) => `${P}/${t}`),
+    // una sola iscrizione per tutto: EMQX Cloud ne accetta al massimo 10 per client e rifiuta
+    // le altre (il 29/10/2026 alla undicesima, foto/+, le foto non arrivavano più)
+    argomenti: [`${P}/#`],
     onMessaggio: (topic, payload) => ricevi(topic, payload).catch((e) => console.error(topic, e)),
     onStato: (s, motivo) => {
       stato.collegamento = s;
@@ -134,6 +136,7 @@ export function riapri() {
 }
 
 async function ricevi(topic, payload) {
+  if (topic === `${P}/comandi`) return; // i comandi dei telefoni (anche i nostri): sono per il cervello
   let dati;
   try {
     dati = await decifra(chiave, topic, payload);

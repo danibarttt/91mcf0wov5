@@ -157,8 +157,17 @@ export class Mqtt {
         this.onMessaggio(topic, corpo.slice(i), Boolean(testa & 1));
         return;
       }
+      case 9: {
+        // SUBACK: un codice 0x80 è un'iscrizione rifiutata, e quei messaggi non arriverebbero mai
+        if (corpo.subarray(2).includes(0x80)) {
+          console.error("iscrizione rifiutata dal broker", this.argomenti);
+          this.motivo = "iscrizione rifiutata dal broker";
+          this.ws.close();
+        }
+        return;
+      }
       default:
-        return; // SUBACK, PINGRESP
+        return; // PINGRESP
     }
   }
 }

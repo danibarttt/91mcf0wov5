@@ -2,11 +2,11 @@
 // vacanza, pericolo) e la scheda degli avvisi (pre-allarme delle persiane, sirene che suonano,
 // fumo, acqua, batterie scariche di sensori e camere, sensori muti) con "Zittisci sirene".
 
-import { comando } from "../collegamento.js?v=3ea7d1f2";
-import { icona } from "../icone.js?v=3ea7d1f2";
-import { sensoriDi, stato } from "../stato.js?v=3ea7d1f2";
-import { esc, etichetta, gradi, mostra, ora, pillola } from "../utili.js?v=3ea7d1f2";
-import * as batterie from "./batterie.js?v=3ea7d1f2";
+import { comando } from "../collegamento.js?v=b6000b80";
+import { icona } from "../icone.js?v=b6000b80";
+import { sensoriDi, stato } from "../stato.js?v=b6000b80";
+import { esc, etichetta, gradi, mostra, ora, pillola } from "../utili.js?v=b6000b80";
+import * as batterie from "./batterie.js?v=b6000b80";
 
 export function html() {
   return pillole() + avvisi();
