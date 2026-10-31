@@ -1,10 +1,10 @@
 // Chi si è collegato alla dashboard: dispositivo, luogo stimato dall'IP, IP e quando. Lo
 // chiede al cervello quando si apre la sezione (cervello/casa/dashboard/accessi.py).
 
-import { comando } from "../collegamento.js?v=3981fb4c";
-import { icona } from "../icone.js?v=3981fb4c";
-import { ridisegna, stato } from "../stato.js?v=3981fb4c";
-import { apribile, esc, ora } from "../utili.js?v=3981fb4c";
+import { comando } from "../collegamento.js?v=b35c0e2f";
+import { icona } from "../icone.js?v=b35c0e2f";
+import { ridisegna, stato } from "../stato.js?v=b35c0e2f";
+import { apribile, esc, ora } from "../utili.js?v=b35c0e2f";
 
 function voce(a) {
   const sconosciuto = !a.d;

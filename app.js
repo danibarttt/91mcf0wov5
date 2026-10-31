@@ -7,21 +7,21 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=3981fb4c";
-import { icona } from "./icone.js?v=3981fb4c";
-import { quandoRidisegnare, stato } from "./stato.js?v=3981fb4c";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=3981fb4c";
-import * as abbinamento from "./sezioni/abbinamento.js?v=3981fb4c";
-import * as accessi from "./sezioni/accessi.js?v=3981fb4c";
-import * as allarme from "./sezioni/allarme.js?v=3981fb4c";
-import * as batterie from "./sezioni/batterie.js?v=3981fb4c";
-import * as camere from "./sezioni/camere.js?v=3981fb4c";
-import * as luci from "./sezioni/luci.js?v=3981fb4c";
-import * as registro from "./sezioni/registro.js?v=3981fb4c";
-import * as riepilogo from "./sezioni/riepilogo.js?v=3981fb4c";
-import * as sensori from "./sezioni/sensori.js?v=3981fb4c";
-import * as sirene from "./sezioni/sirene.js?v=3981fb4c";
-import * as vacanza from "./sezioni/vacanza.js?v=3981fb4c";
+import * as collegamento from "./collegamento.js?v=b35c0e2f";
+import { icona } from "./icone.js?v=b35c0e2f";
+import { quandoRidisegnare, stato } from "./stato.js?v=b35c0e2f";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=b35c0e2f";
+import * as abbinamento from "./sezioni/abbinamento.js?v=b35c0e2f";
+import * as accessi from "./sezioni/accessi.js?v=b35c0e2f";
+import * as allarme from "./sezioni/allarme.js?v=b35c0e2f";
+import * as batterie from "./sezioni/batterie.js?v=b35c0e2f";
+import * as camere from "./sezioni/camere.js?v=b35c0e2f";
+import * as luci from "./sezioni/luci.js?v=b35c0e2f";
+import * as registro from "./sezioni/registro.js?v=b35c0e2f";
+import * as riepilogo from "./sezioni/riepilogo.js?v=b35c0e2f";
+import * as sensori from "./sezioni/sensori.js?v=b35c0e2f";
+import * as sirene from "./sezioni/sirene.js?v=b35c0e2f";
+import * as vacanza from "./sezioni/vacanza.js?v=b35c0e2f";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -50,35 +50,44 @@ const cambi = { ...vacanza.cambi };
 
 // al massimo una volta per fotogramma, anche se arrivano tanti messaggi insieme
 let disegnoInAttesa = false;
-let scorrimento = null; // dove era la dashboard quando ha lasciato il posto allo spinner
 function disegna() {
   if (disegnoInAttesa) return;
   disegnoInAttesa = true;
   requestAnimationFrame(() => {
     disegnoInAttesa = false;
-    const app = $("app");
-    // una sezione aperta o chiusa da un tocco appena prima: l'evento "toggle" arriva dopo il
-    // ridisegno, su un elemento ormai tolto, e andrebbe perso
-    for (const d of app.querySelectorAll("details[data-sezione]")) sezioneAperta(d.dataset.sezione, d.open);
-    // la dashboard solo collegati e con lo stato arrivato: mai dati che potrebbero essere
-    // vecchi (al ritorno in primo piano la connessione si controlla, e intanto c'è lo spinner)
-    const inAttesaDiCasa = collegamento.abbinato() && (!stato.allarme || stato.collegamento !== "collegato");
-    if (inAttesaDiCasa && app.dataset.vista === "dashboard") scorrimento = scrollY;
-    app.dataset.vista = !collegamento.abbinato() ? "abbinamento" : inAttesaDiCasa ? "attesa" : "dashboard";
-    app.innerHTML = !collegamento.abbinato() ? abbinamento.schermata() : inAttesaDiCasa ? htmlCaricamento() : htmlDashboard();
-    if (!inAttesaDiCasa && scorrimento != null) {
-      scrollTo(0, scorrimento);
-      scorrimento = null;
-    }
-    if (!inAttesaDiCasa && app.dataset.pronta !== "1") {
-      app.dataset.pronta = "1";
-      app.classList.add("entra"); // solo alla prima comparsa, non a ogni ridisegno
-      setTimeout(() => app.classList.remove("entra"), 800);
-    }
-    // la Content-Security-Policy vieta gli stili scritti nell'HTML: i colori dei dati
-    // (es. quello di una lampadina) si impostano da qui
-    for (const el of app.querySelectorAll("[data-colore]")) el.style.setProperty("--colore", el.dataset.colore);
+    disegnaOra();
   });
+}
+
+let scorrimento = null; // dove era la dashboard quando ha lasciato il posto allo spinner
+function disegnaOra() {
+  const app = $("app");
+  // una sezione aperta o chiusa da un tocco appena prima: l'evento "toggle" arriva dopo il
+  // ridisegno, su un elemento ormai tolto, e andrebbe perso
+  for (const d of app.querySelectorAll("details[data-sezione]")) sezioneAperta(d.dataset.sezione, d.open);
+  // la dashboard solo collegati e con lo stato arrivato: mai dati che potrebbero essere
+  // vecchi (al ritorno in primo piano la connessione si controlla, e intanto c'è lo spinner)
+  const inAttesaDiCasa = collegamento.abbinato() && (!stato.allarme || stato.collegamento !== "collegato" || stato.sospesa);
+  if (inAttesaDiCasa && app.dataset.vista === "dashboard") {
+    scorrimento = scrollY;
+    // anche le finestre sopra (luce, camere, conferma) mostrano o chiedono su dati che ora
+    // potrebbero essere vecchi: si chiudono (una conferma chiusa così vale "Annulla")
+    for (const d of document.querySelectorAll("dialog[open]")) d.close();
+  }
+  app.dataset.vista = !collegamento.abbinato() ? "abbinamento" : inAttesaDiCasa ? "attesa" : "dashboard";
+  app.innerHTML = !collegamento.abbinato() ? abbinamento.schermata() : inAttesaDiCasa ? htmlCaricamento() : htmlDashboard();
+  if (!inAttesaDiCasa && scorrimento != null) {
+    scrollTo(0, scorrimento);
+    scorrimento = null;
+  }
+  if (!inAttesaDiCasa && app.dataset.pronta !== "1") {
+    app.dataset.pronta = "1";
+    app.classList.add("entra"); // solo alla prima comparsa, non a ogni ridisegno
+    setTimeout(() => app.classList.remove("entra"), 800);
+  }
+  // la Content-Security-Policy vieta gli stili scritti nell'HTML: i colori dei dati
+  // (es. quello di una lampadina) si impostano da qui
+  for (const el of app.querySelectorAll("[data-colore]")) el.style.setProperty("--colore", el.dataset.colore);
 }
 
 // i rifiuti del broker, per cui la pagina smette di riprovare da sola (vedi mqtt.js):
@@ -118,6 +127,10 @@ function disegnaData() {
 // dopo ogni messaggio del cervello (argomento: "allarme", "luci", "foto/3"...)
 function arrivato(argomento) {
   disegnaCollegamento();
+  // connessione persa o da controllare: lo spinner subito, non al prossimo fotogramma (una
+  // connessione che torna nello stesso fotogramma non deve far saltare il passaggio, né la
+  // chiusura delle finestre aperte sopra)
+  if (argomento === "collegamento" && stato.collegamento !== "collegato") return disegnaOra();
   if (argomento === "luci") luci.aggiornaPannello();
   if (argomento.startsWith("foto/")) camere.aggiornaVisore();
   disegna();
@@ -174,11 +187,20 @@ document.addEventListener(
   true,
 );
 
-// in secondo piano il sistema chiude la connessione: al ritorno si riapre subito
+// in secondo piano il sistema chiude la connessione, a volte senza dirlo: andando via lo
+// spinner subito (senza aspettare il fotogramma dopo, che in secondo piano non arriva), al
+// ritorno si controlla la connessione (collegamento.js)
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) camere.fermaDiretta();
-  else collegamento.riapri();
+  if (document.hidden) {
+    camere.fermaDiretta();
+    collegamento.sospendi();
+    disegnaOra();
+  } else collegamento.riapri();
 });
+// riaperta dalla cache del browser (indietro/avanti) o con la rete tornata: si controlla
+addEventListener("pageshow", (e) => e.persisted && collegamento.riapri());
+addEventListener("online", () => collegamento.riapri());
+addEventListener("offline", () => collegamento.retePersa());
 
 // ---------- avvio ----------
 

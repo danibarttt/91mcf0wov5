@@ -5,9 +5,13 @@
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
-const PING_MS = 20000;
-const RISPOSTA_PING_MS = 3000; // un PING di controllo senza risposta entro così: connessione morta
-const FRESCO_MS = PING_MS + 5000; // l'ultimo dato è più vecchio di così: prima di pubblicare si controlla
+// Una connessione morta (rete persa, telefono in secondo piano) spesso non si chiude: niente
+// arriva più e la pagina non lo sa. Per accorgersene si manda un PING ogni PING_MS e senza
+// risposta entro RISPOSTA_PING_MS la si butta: la pagina non resta "collegata" con dati vecchi
+// per più di circa 8 s. Costa poco: un PING sono pochi byte.
+const PING_MS = 5000;
+const RISPOSTA_PING_MS = 3000;
+const FRESCO_MS = PING_MS + RISPOSTA_PING_MS + 1000; // l'ultimo dato è più vecchio: prima di pubblicare si controlla
 
 function varint(n) {
   const out = [];
@@ -83,24 +87,31 @@ export class Mqtt {
     }
   }
 
-  // al ritorno in primo piano: la connessione può essere morta senza che la pagina lo sappia
-  // (l'iPhone la chiude in secondo piano e non lo dice, e un comando partirebbe nel vuoto,
-  // 31/10/2026). Un PING: se non risponde, se ne apre subito un'altra.
-  // Finché non risponde lo stato è "controllo": la pagina non si dice collegata.
-  controlla() {
-    if (!this.collegato) return this.apri();
-    if (this.timerControllo) return;
+  // un PING: se entro RISPOSTA_PING_MS non arriva niente, la connessione è morta
+  sonda() {
+    if (this.timerRisposta) return;
     try {
       this.ws.send(pacchetto(0xc0));
     } catch {}
-    this.timerControllo = setTimeout(() => this.butta("nessuna risposta"), RISPOSTA_PING_MS);
+    this.timerRisposta = setTimeout(() => this.butta("nessuna risposta"), RISPOSTA_PING_MS);
+  }
+
+  // al ritorno in primo piano: la connessione può essere morta senza che la pagina lo sappia
+  // (l'iPhone la chiude in secondo piano e non lo dice, e un comando partirebbe nel vuoto,
+  // 31/10/2026). Finché il PING non ha risposta lo stato è "controllo": la pagina non si dice
+  // collegata. Se non risponde, se ne apre subito un'altra.
+  controlla() {
+    if (!this.collegato) return this.apri();
+    if (this.inControllo) return;
+    this.inControllo = true;
+    this.sonda();
     this.onStato("controllo");
   }
 
   // true quando si può pubblicare con fiducia (connessione che ha parlato da poco, o appena
   // controllata o riaperta), false se non succede entro `entro_ms`
   async pronto(entro_ms) {
-    const vivo = () => this.collegato && !this.timerControllo && Date.now() - this.ultimoDato < FRESCO_MS;
+    const vivo = () => this.collegato && !this.inControllo && Date.now() - this.ultimoDato < FRESCO_MS;
     if (vivo()) return true;
     if (this.chiuso) return false; // credenziali o iscrizione rifiutate: non si riprova da soli
     this.controlla();
@@ -126,8 +137,9 @@ export class Mqtt {
 
   caduto(motivo) {
     clearInterval(this.timerPing);
-    clearTimeout(this.timerControllo);
-    this.timerControllo = null;
+    clearTimeout(this.timerRisposta);
+    this.timerRisposta = null;
+    this.inControllo = false;
     this.collegato = false;
     this.ws = null;
     this.onStato("scollegato", this.motivo || motivo);
@@ -143,11 +155,12 @@ export class Mqtt {
   }
 
   ricevi(dati) {
+    // qualunque dato dice che la connessione è viva
     this.ultimoDato = Date.now();
-    if (this.timerControllo) {
-      // qualunque dato dice che la connessione è viva
-      clearTimeout(this.timerControllo);
-      this.timerControllo = null;
+    clearTimeout(this.timerRisposta);
+    this.timerRisposta = null;
+    if (this.inControllo) {
+      this.inControllo = false;
       this.onStato("collegato");
     }
     const b = new Uint8Array(this.buffer.length + dati.length);
@@ -189,12 +202,7 @@ export class Mqtt {
         const sub = this.argomenti.flatMap((t) => [...stringa(t), 0]);
         this.ws.send(pacchetto(0x82, [0, 1], sub));
         this.ultimoDato = Date.now();
-        this.timerPing = setInterval(() => {
-          if (Date.now() - this.ultimoDato > 45000) return this.butta("nessuna risposta");
-          try {
-            this.ws.send(pacchetto(0xc0));
-          } catch {}
-        }, PING_MS);
+        this.timerPing = setInterval(() => this.sonda(), PING_MS);
         this.onStato("collegato");
         return;
       }

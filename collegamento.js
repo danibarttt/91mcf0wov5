@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=3981fb4c";
-import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=3981fb4c";
-import { stato } from "./stato.js?v=3981fb4c";
+import { Mqtt } from "./mqtt.js?v=b35c0e2f";
+import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=b35c0e2f";
+import { stato } from "./stato.js?v=b35c0e2f";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
@@ -107,6 +107,8 @@ export async function collega(quandoArriva) {
       // scollegati, lo stato dell'allarme non è più sicuro: la pagina aspetta quello nuovo
       // (al posto della dashboard lo spinner, app.js), che arriva subito dopo il collegamento
       if (s === "scollegato") stato.allarme = null;
+      // tornati in primo piano, la connessione ha risposto (o è nuova): via lo spinner
+      if (s === "collegato" && !document.hidden) stato.sospesa = false;
       stato.collegamento = s;
       stato.motivo = motivo || "";
       alMessaggio("collegamento");
@@ -135,10 +137,20 @@ function idDispositivo() {
   }
 }
 
-// in secondo piano il sistema chiude la connessione, a volte senza dirlo: al ritorno la si
-// controlla, e se è morta se ne apre subito un'altra
+// in secondo piano il sistema chiude la connessione, a volte senza dirlo: andando in secondo
+// piano la pagina mette subito lo spinner (riaprendo l'app non si vede la dashboard di prima
+// neanche per un istante), e al ritorno controlla la connessione: la dashboard torna quando ha
+// risposto, se è morta se ne apre subito un'altra
+export function sospendi() {
+  stato.sospesa = true;
+}
 export function riapri() {
   if (client) client.controlla();
+}
+
+// il telefono ha perso la rete: la connessione è morta anche se non si è ancora chiusa
+export function retePersa() {
+  if (client) client.butta("rete assente");
 }
 
 async function ricevi(topic, payload) {

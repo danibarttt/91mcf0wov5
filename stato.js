@@ -5,6 +5,7 @@
 export const stato = {
   collegamento: "collegamento", // "collegamento" | "collegato" | "controllo" (al ritorno in primo piano: risponde ancora?) | "scollegato"
   motivo: "", // perché è scollegato (es. "credenziali rifiutate")
+  sospesa: false, // la pagina è andata in secondo piano e la connessione non ha ancora risposto al ritorno
   cervello: null, // {online, dal}
   allarme: null, // {stato: "spento"|"acceso"|"scattato", perche, dal, vacanza, orari, preallarme: {causa, fino} o null}
   camere: [], // [{c, n}]
