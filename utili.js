@@ -1,6 +1,6 @@
 // Pezzi usati da più sezioni: testo, orari, avvisi, conferme e sezioni a scomparsa.
 
-import { icona } from "./icone.js?v=e1c5513a";
+import { icona } from "./icone.js?v=0ce3ef5b";
 
 export const $ = (id) => document.getElementById(id);
 

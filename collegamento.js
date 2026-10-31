@@ -1,14 +1,15 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=e1c5513a";
-import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=e1c5513a";
-import { stato } from "./stato.js?v=e1c5513a";
+import { Mqtt } from "./mqtt.js?v=0ce3ef5b";
+import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=0ce3ef5b";
+import { stato } from "./stato.js?v=0ce3ef5b";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
 const PORTA_WS = 8084;
 const ATTESA_RISPOSTA_MS = 20000;
+const ATTESA_COLLEGAMENTO_MS = 10000; // un comando aspetta al massimo così una connessione da riaprire
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -130,9 +131,10 @@ function idDispositivo() {
   }
 }
 
-// in secondo piano il sistema chiude la connessione: al ritorno si riapre subito
+// in secondo piano il sistema chiude la connessione, a volte senza dirlo: al ritorno la si
+// controlla, e se è morta se ne apre subito un'altra
 export function riapri() {
-  if (client) client.apri();
+  if (client) client.controlla();
 }
 
 async function ricevi(topic, payload) {
@@ -175,7 +177,9 @@ async function ricevi(topic, payload) {
 
 // manda un comando al cervello e aspetta la risposta (eccezione con il messaggio d'errore)
 export async function comando(azione, argomenti = {}) {
-  if (!client || !client.collegato) throw new Error("Non collegato a casa");
+  // prima ci si assicura che la connessione sia viva: un comando pubblicato su una connessione
+  // morta si perde senza errori (31/10/2026: lo spegnimento dell'allarme)
+  if (!client || !(await client.pronto(ATTESA_COLLEGAMENTO_MS))) throw new Error("Non collegato a casa");
   const id = casuale(8);
   const msg = { ...argomenti, id, ts: Date.now(), nonce: casuale(), a: azione };
   const blob = await cifra(chiave, `${P}/comandi`, imbottisci(enc.encode(JSON.stringify(msg))));

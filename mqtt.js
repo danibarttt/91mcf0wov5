@@ -5,6 +5,10 @@
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
+const PING_MS = 20000;
+const RISPOSTA_PING_MS = 3000; // un PING di controllo senza risposta entro così: connessione morta
+const FRESCO_MS = PING_MS + 5000; // l'ultimo dato è più vecchio di così: prima di pubblicare si controlla
+
 function varint(n) {
   const out = [];
   do {
@@ -78,8 +82,49 @@ export class Mqtt {
     }
   }
 
+  // al ritorno in primo piano: la connessione può essere morta senza che la pagina lo sappia
+  // (l'iPhone la chiude in secondo piano e non lo dice, e un comando partirebbe nel vuoto,
+  // 31/10/2026). Un PING: se non risponde, se ne apre subito un'altra.
+  controlla() {
+    if (!this.collegato) return this.apri();
+    if (this.timerControllo) return;
+    try {
+      this.ws.send(pacchetto(0xc0));
+    } catch {}
+    this.timerControllo = setTimeout(() => this.butta("nessuna risposta"), RISPOSTA_PING_MS);
+  }
+
+  // true quando si può pubblicare con fiducia (connessione che ha parlato da poco, o appena
+  // controllata o riaperta), false se non succede entro `entro_ms`
+  async pronto(entro_ms) {
+    const vivo = () => this.collegato && !this.timerControllo && Date.now() - this.ultimoDato < FRESCO_MS;
+    if (vivo()) return true;
+    if (this.chiuso) return false; // credenziali o iscrizione rifiutate: non si riprova da soli
+    this.controlla();
+    for (const fine = Date.now() + entro_ms; Date.now() < fine; ) {
+      await new Promise((ok) => setTimeout(ok, 100));
+      if (vivo()) return true;
+    }
+    return false;
+  }
+
+  // una connessione che non risponde: la si lascia senza aspettare che il sistema se ne accorga
+  // (su una connessione morta può volerci più di un minuto) e se ne apre subito un'altra
+  butta(motivo) {
+    const ws = this.ws;
+    if (!ws) return;
+    ws.onopen = ws.onmessage = ws.onclose = null;
+    try {
+      ws.close();
+    } catch {}
+    this.caduto(motivo);
+    if (!this.chiuso) this.apri();
+  }
+
   caduto(motivo) {
     clearInterval(this.timerPing);
+    clearTimeout(this.timerControllo);
+    this.timerControllo = null;
     this.collegato = false;
     this.ws = null;
     this.onStato("scollegato", this.motivo || motivo);
@@ -96,6 +141,8 @@ export class Mqtt {
 
   ricevi(dati) {
     this.ultimoDato = Date.now();
+    clearTimeout(this.timerControllo); // qualunque dato dice che la connessione è viva
+    this.timerControllo = null;
     const b = new Uint8Array(this.buffer.length + dati.length);
     b.set(this.buffer, 0);
     b.set(dati, this.buffer.length);
@@ -136,11 +183,11 @@ export class Mqtt {
         this.ws.send(pacchetto(0x82, [0, 1], sub));
         this.ultimoDato = Date.now();
         this.timerPing = setInterval(() => {
-          if (Date.now() - this.ultimoDato > 45000) return this.ws && this.ws.close();
+          if (Date.now() - this.ultimoDato > 45000) return this.butta("nessuna risposta");
           try {
             this.ws.send(pacchetto(0xc0));
           } catch {}
-        }, 20000);
+        }, PING_MS);
         this.onStato("collegato");
         return;
       }
