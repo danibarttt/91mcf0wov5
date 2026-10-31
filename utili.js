@@ -1,6 +1,6 @@
 // Pezzi usati da più sezioni: testo, orari, avvisi, conferme e sezioni a scomparsa.
 
-import { icona } from "./icone.js?v=0ce3ef5b";
+import { icona } from "./icone.js?v=3981fb4c";
 
 export const $ = (id) => document.getElementById(id);
 
@@ -43,6 +43,16 @@ export function mostra(testo, errore = false) {
   el.hidden = false;
   clearTimeout(mostra.timer);
   mostra.timer = setTimeout(() => (el.hidden = true), errore ? 5000 : 2500);
+}
+
+// avviso verde con la spunta: casa ha fatto ciò che si è chiesto (es. allarme spento)
+export function fatto(testo) {
+  const el = $("avviso");
+  el.innerHTML = `${icona("ok")}<span>${esc(testo)}</span>`;
+  el.className = "avviso fatto";
+  el.hidden = false;
+  clearTimeout(mostra.timer);
+  mostra.timer = setTimeout(() => (el.hidden = true), 4000);
 }
 
 // conferma contro i tocchi per sbaglio (niente PIN: basta essere abbinati); true = confermato

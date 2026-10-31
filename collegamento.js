@@ -1,9 +1,9 @@
 // Il collegamento con casa: abbinamento (codice salvato nel telefono), broker MQTT in cloud,
 // messaggi cifrati in arrivo (finiscono in `stato`) e comandi in partenza.
 
-import { Mqtt } from "./mqtt.js?v=0ce3ef5b";
-import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=0ce3ef5b";
-import { stato } from "./stato.js?v=0ce3ef5b";
+import { Mqtt } from "./mqtt.js?v=3981fb4c";
+import { importaChiave, cifra, decifra, imbottisci } from "./cifra.js?v=3981fb4c";
+import { stato } from "./stato.js?v=3981fb4c";
 
 const ARCHIVIO = "casa"; // chiave del localStorage con l'abbinamento
 const DISPOSITIVO = "casa-dispositivo"; // chiave del localStorage con l'id di questo dispositivo (registro degli accessi)
@@ -103,10 +103,14 @@ export async function collega(quandoArriva) {
     argomenti: [`${P}/#`],
     onMessaggio: (topic, payload) => ricevi(topic, payload).catch((e) => console.error(topic, e)),
     onStato: (s, motivo) => {
+      const nuova = s === "collegato" && stato.collegamento !== "controllo"; // non la stessa, che ha risposto al controllo
+      // scollegati, lo stato dell'allarme non è più sicuro: la pagina aspetta quello nuovo
+      // (al posto della dashboard lo spinner, app.js), che arriva subito dopo il collegamento
+      if (s === "scollegato") stato.allarme = null;
       stato.collegamento = s;
       stato.motivo = motivo || "";
       alMessaggio("collegamento");
-      if (s === "collegato") {
+      if (nuova) {
         attesoCervello = true;
         presentati();
       }

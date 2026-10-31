@@ -370,6 +370,9 @@ dialog form h2 { margin-bottom: 18px; }
   background: var(--testo); color: var(--carta); font-size: 15px; font-weight: 600; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 .avviso.errore { background: var(--pericolo); color: #fff; }
+.avviso.fatto { display: flex; align-items: center; gap: 10px; background: var(--ok); color: var(--carta); font-size: 16px; }
+.avviso.fatto .ic { width: 22px; height: 22px; flex: none; }
+.bottone .spinner { width: 18px; height: 18px; border-width: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

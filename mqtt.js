@@ -40,7 +40,8 @@ function pacchetto(tipo, ...parti) {
 }
 
 export class Mqtt {
-  // onMessaggio(topic, payload: Uint8Array, retain), onStato("collegamento"|"collegato"|"scollegato", dettaglio)
+  // onMessaggio(topic, payload: Uint8Array, retain), onStato("collegamento"|"collegato"|"controllo"|"scollegato", dettaglio).
+  // "collegato" dopo "controllo" è la stessa connessione, che ha risposto; dopo gli altri, una nuova.
   constructor({ url, clientId, utente, password, argomenti, onMessaggio, onStato }) {
     Object.assign(this, { url, clientId, utente, password, argomenti, onMessaggio, onStato });
     this.ws = null;
@@ -85,6 +86,7 @@ export class Mqtt {
   // al ritorno in primo piano: la connessione può essere morta senza che la pagina lo sappia
   // (l'iPhone la chiude in secondo piano e non lo dice, e un comando partirebbe nel vuoto,
   // 31/10/2026). Un PING: se non risponde, se ne apre subito un'altra.
+  // Finché non risponde lo stato è "controllo": la pagina non si dice collegata.
   controlla() {
     if (!this.collegato) return this.apri();
     if (this.timerControllo) return;
@@ -92,6 +94,7 @@ export class Mqtt {
       this.ws.send(pacchetto(0xc0));
     } catch {}
     this.timerControllo = setTimeout(() => this.butta("nessuna risposta"), RISPOSTA_PING_MS);
+    this.onStato("controllo");
   }
 
   // true quando si può pubblicare con fiducia (connessione che ha parlato da poco, o appena
@@ -141,8 +144,12 @@ export class Mqtt {
 
   ricevi(dati) {
     this.ultimoDato = Date.now();
-    clearTimeout(this.timerControllo); // qualunque dato dice che la connessione è viva
-    this.timerControllo = null;
+    if (this.timerControllo) {
+      // qualunque dato dice che la connessione è viva
+      clearTimeout(this.timerControllo);
+      this.timerControllo = null;
+      this.onStato("collegato");
+    }
     const b = new Uint8Array(this.buffer.length + dati.length);
     b.set(this.buffer, 0);
     b.set(dati, this.buffer.length);

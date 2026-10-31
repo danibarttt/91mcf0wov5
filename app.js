@@ -7,21 +7,21 @@
 // Un pulsante con data-azione="x" chiama azioni.x(elemento) della sua sezione; un
 // interruttore con data-cambia="x" chiama cambi.x(elemento) all'evento "change".
 
-import * as collegamento from "./collegamento.js?v=0ce3ef5b";
-import { icona } from "./icone.js?v=0ce3ef5b";
-import { quandoRidisegnare, stato } from "./stato.js?v=0ce3ef5b";
-import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=0ce3ef5b";
-import * as abbinamento from "./sezioni/abbinamento.js?v=0ce3ef5b";
-import * as accessi from "./sezioni/accessi.js?v=0ce3ef5b";
-import * as allarme from "./sezioni/allarme.js?v=0ce3ef5b";
-import * as batterie from "./sezioni/batterie.js?v=0ce3ef5b";
-import * as camere from "./sezioni/camere.js?v=0ce3ef5b";
-import * as luci from "./sezioni/luci.js?v=0ce3ef5b";
-import * as registro from "./sezioni/registro.js?v=0ce3ef5b";
-import * as riepilogo from "./sezioni/riepilogo.js?v=0ce3ef5b";
-import * as sensori from "./sezioni/sensori.js?v=0ce3ef5b";
-import * as sirene from "./sezioni/sirene.js?v=0ce3ef5b";
-import * as vacanza from "./sezioni/vacanza.js?v=0ce3ef5b";
+import * as collegamento from "./collegamento.js?v=3981fb4c";
+import { icona } from "./icone.js?v=3981fb4c";
+import { quandoRidisegnare, stato } from "./stato.js?v=3981fb4c";
+import { $, maiuscola, mostra, sezioniAperte } from "./utili.js?v=3981fb4c";
+import * as abbinamento from "./sezioni/abbinamento.js?v=3981fb4c";
+import * as accessi from "./sezioni/accessi.js?v=3981fb4c";
+import * as allarme from "./sezioni/allarme.js?v=3981fb4c";
+import * as batterie from "./sezioni/batterie.js?v=3981fb4c";
+import * as camere from "./sezioni/camere.js?v=3981fb4c";
+import * as luci from "./sezioni/luci.js?v=3981fb4c";
+import * as registro from "./sezioni/registro.js?v=3981fb4c";
+import * as riepilogo from "./sezioni/riepilogo.js?v=3981fb4c";
+import * as sensori from "./sezioni/sensori.js?v=3981fb4c";
+import * as sirene from "./sezioni/sirene.js?v=3981fb4c";
+import * as vacanza from "./sezioni/vacanza.js?v=3981fb4c";
 
 // la dashboard, dall'alto in basso
 function htmlDashboard() {
@@ -50,6 +50,7 @@ const cambi = { ...vacanza.cambi };
 
 // al massimo una volta per fotogramma, anche se arrivano tanti messaggi insieme
 let disegnoInAttesa = false;
+let scorrimento = null; // dove era la dashboard quando ha lasciato il posto allo spinner
 function disegna() {
   if (disegnoInAttesa) return;
   disegnoInAttesa = true;
@@ -59,9 +60,16 @@ function disegna() {
     // una sezione aperta o chiusa da un tocco appena prima: l'evento "toggle" arriva dopo il
     // ridisegno, su un elemento ormai tolto, e andrebbe perso
     for (const d of app.querySelectorAll("details[data-sezione]")) sezioneAperta(d.dataset.sezione, d.open);
-    // finché non arriva lo stato dell'allarme: schermata di caricamento, poi dissolvenza
-    const inAttesaDiCasa = collegamento.abbinato() && !stato.allarme;
+    // la dashboard solo collegati e con lo stato arrivato: mai dati che potrebbero essere
+    // vecchi (al ritorno in primo piano la connessione si controlla, e intanto c'è lo spinner)
+    const inAttesaDiCasa = collegamento.abbinato() && (!stato.allarme || stato.collegamento !== "collegato");
+    if (inAttesaDiCasa && app.dataset.vista === "dashboard") scorrimento = scrollY;
+    app.dataset.vista = !collegamento.abbinato() ? "abbinamento" : inAttesaDiCasa ? "attesa" : "dashboard";
     app.innerHTML = !collegamento.abbinato() ? abbinamento.schermata() : inAttesaDiCasa ? htmlCaricamento() : htmlDashboard();
+    if (!inAttesaDiCasa && scorrimento != null) {
+      scrollTo(0, scorrimento);
+      scorrimento = null;
+    }
     if (!inAttesaDiCasa && app.dataset.pronta !== "1") {
       app.dataset.pronta = "1";
       app.classList.add("entra"); // solo alla prima comparsa, non a ogni ridisegno
@@ -92,6 +100,7 @@ function htmlCaricamento() {
 // il pallino in alto a destra
 function disegnaCollegamento() {
   let s = stato.collegamento;
+  if (s === "controllo") s = "collegamento";
   let testo = { collegamento: "Collegamento…", collegato: "Collegato", scollegato: "Non collegato" }[s];
   if (!collegamento.abbinato()) testo = "Non abbinato";
   else if (s === "collegato" && stato.cervello && !stato.cervello.online) {
@@ -109,10 +118,6 @@ function disegnaData() {
 // dopo ogni messaggio del cervello (argomento: "allarme", "luci", "foto/3"...)
 function arrivato(argomento) {
   disegnaCollegamento();
-  if (argomento === "collegamento") {
-    if (!stato.allarme) disegna(); // il testo sotto lo spinner
-    return;
-  }
   if (argomento === "luci") luci.aggiornaPannello();
   if (argomento.startsWith("foto/")) camere.aggiornaVisore();
   disegna();

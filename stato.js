@@ -3,7 +3,7 @@
 // cervello/casa/dashboard/__init__.py.
 
 export const stato = {
-  collegamento: "collegamento", // "collegamento" | "collegato" | "scollegato"
+  collegamento: "collegamento", // "collegamento" | "collegato" | "controllo" (al ritorno in primo piano: risponde ancora?) | "scollegato"
   motivo: "", // perché è scollegato (es. "credenziali rifiutate")
   cervello: null, // {online, dal}
   allarme: null, // {stato: "spento"|"acceso"|"scattato", perche, dal, vacanza, orari, preallarme: {causa, fino} o null}
