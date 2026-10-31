@@ -1,10 +1,10 @@
 // Il registro delle ultime 24 ore, chiesto al cervello a ogni apertura della sezione e col
 // pulsante "Aggiorna" in cima.
 
-import { comando } from "../collegamento.js?v=b35c0e2f";
-import { icona } from "../icone.js?v=b35c0e2f";
-import { ridisegna, stato } from "../stato.js?v=b35c0e2f";
-import { apribile, esc, etichetta, maiuscola } from "../utili.js?v=b35c0e2f";
+import { comando } from "../collegamento.js?v=d6e94351";
+import { icona } from "../icone.js?v=d6e94351";
+import { ridisegna, stato } from "../stato.js?v=d6e94351";
+import { apribile, esc, etichetta, maiuscola } from "../utili.js?v=d6e94351";
 
 const ICONE = {
   allarme: "scudo", vacanza: "valigia", contatto: "porta", persona: "persona", fumo: "fiamma", acqua: "goccia",
