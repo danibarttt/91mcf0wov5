@@ -1,10 +1,10 @@
 // La scheda dell'allarme in cima: spento (grigio), acceso (rosso), scattato; Accendi/Spegni.
 // Durante il pre-allarme delle persiane l'allarme resta acceso: il dettaglio lo dice.
 
-import { comando } from "../collegamento.js?v=d6e94351";
-import { icona } from "../icone.js?v=d6e94351";
-import { ridisegna, stato } from "../stato.js?v=d6e94351";
-import { conferma, esc, etichetta, fatto, ora } from "../utili.js?v=d6e94351";
+import { comando } from "../collegamento.js?v=8f0df873";
+import { icona } from "../icone.js?v=8f0df873";
+import { ridisegna, stato } from "../stato.js?v=8f0df873";
+import { conferma, esc, etichetta, fatto, ora } from "../utili.js?v=8f0df873";
 
 const TITOLI = { spento: "Spento", acceso: "Acceso", scattato: "Scattato!" };
 const SIMBOLI = { spento: "scudo", acceso: "scudoOk", scattato: "scudoAllarme" };

@@ -2,8 +2,8 @@
 // simulazioni, si accende e si spegne da una pagina in casa, che si apre solo col telefono sul
 // Wi-Fi di casa (cervello/casa/tailscale.py): da fuori non si accende né si spegne.
 
-import { comando } from "../collegamento.js?v=d6e94351";
-import { sezione } from "../utili.js?v=d6e94351";
+import { comando } from "../collegamento.js?v=8f0df873";
+import { sezione } from "../utili.js?v=8f0df873";
 
 export function html() {
   return sezione(
